@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SysAreaDao">
+    <resultMap id="sysAreaMap" type="com.cndinuo.domain.SysArea">
+        <result property="id" column="id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mergerName" column="merger_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="shortName" column="short_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mergerShortName" column="merger_short_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="levelType" column="level_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="cityCode" column="city_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="zipCode" column="zip_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="pinyin" column="pinyin" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="jianpin" column="jianpin" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="firstChar" column="first_char" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="lng" column="lng" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="lat" column="lat" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		parent_id,
+		name,
+		merger_name,
+		short_name,
+		merger_short_name,
+		level_type,
+		city_code,
+		zip_code,
+		pinyin,
+		jianpin,
+		first_char,
+		lng,
+		lat,
+		remark
+	</sql>
+    <select id="getById" resultMap="sysAreaMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sys_area  sysArea
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="sysAreaMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from sys_area  sysArea
+		<where>
+			<if test="id != null and id != ''" >
+				and id = #{id}
+			</if>
+			<if test="parentId != null and parentId != ''" >
+				and parent_id = #{parentId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="sysAreaMap" parameterType="com.cndinuo.domain.SysArea">
+		select <include refid="cols"/> from sys_area  sysArea
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="sysAreaMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from sys_area  sysArea
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sys_area  sysArea
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from sys_area  sysArea
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sys_area  sysArea
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.SysArea" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_area (
+			parent_id,
+			name,
+			merger_name,
+			short_name,
+			merger_short_name,
+			level_type,
+			city_code,
+			zip_code,
+			pinyin,
+			jianpin,
+			first_char,
+			lng,
+			lat,
+			remark) 
+		value (
+			#{parentId,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			#{mergerName,jdbcType=VARCHAR},
+			#{shortName,jdbcType=VARCHAR},
+			#{mergerShortName,jdbcType=VARCHAR},
+			#{levelType,jdbcType=VARCHAR},
+			#{cityCode,jdbcType=VARCHAR},
+			#{zipCode,jdbcType=VARCHAR},
+			#{pinyin,jdbcType=VARCHAR},
+			#{jianpin,jdbcType=VARCHAR},
+			#{firstChar,jdbcType=VARCHAR},
+			#{lng,jdbcType=VARCHAR},
+			#{lat,jdbcType=VARCHAR},
+			#{remark,jdbcType=VARCHAR}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.SysArea">
+		update sys_area sysArea set 
+			parent_id = #{parentId,jdbcType=VARCHAR},
+			name = #{name,jdbcType=VARCHAR},
+			merger_name = #{mergerName,jdbcType=VARCHAR},
+			short_name = #{shortName,jdbcType=VARCHAR},
+			merger_short_name = #{mergerShortName,jdbcType=VARCHAR},
+			level_type = #{levelType,jdbcType=VARCHAR},
+			city_code = #{cityCode,jdbcType=VARCHAR},
+			zip_code = #{zipCode,jdbcType=VARCHAR},
+			pinyin = #{pinyin,jdbcType=VARCHAR},
+			jianpin = #{jianpin,jdbcType=VARCHAR},
+			first_char = #{firstChar,jdbcType=VARCHAR},
+			lng = #{lng,jdbcType=VARCHAR},
+			lat = #{lat,jdbcType=VARCHAR},
+			remark = #{remark,jdbcType=VARCHAR}
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update sys_area  sysArea set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sys_area sysArea set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update sys_area sysArea set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SysArea">
+		update sys_area sysArea set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

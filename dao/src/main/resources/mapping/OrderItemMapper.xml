@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.OrderItemDao">
+    <resultMap id="orderItemMap" type="com.cndinuo.domain.OrderItem">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="orderNo" column="order_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="goodsId" column="goods_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="num" column="num" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="unitPrice" column="unit_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="payPrice" column="pay_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		order_no,
+		goods_id,
+		num,
+		unit_price,
+		pay_price
+	</sql>
+    <select id="getById" resultMap="orderItemMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from order_item  orderItem
+		 where id = #{id}
+	</select>
+
+    <select id="getItemsByOrderNo" resultMap="orderItemMap" parameterType="java.lang.String">
+		select <include refid="cols"/> from order_item  orderItem
+        where order_no = #{orderNo}
+	</select>
+
+	<select id="getOrderItemByGoods" parameterType="java.lang.String" resultMap="orderItemMap">
+		SELECT
+			oi.num,
+			oi.pay_price,
+			oi.unit_price,
+			oi.goods_id,
+			mg.bar_code as barCode,
+			mg.goods_name as goodsName,
+			CONCAT((SELECT `value` from sys_setting where `key` = 'img_server' and deleted = 0),"/",mg.goods_image) as goodsImage,
+			oi.order_no,
+			o.order_type
+		FROM
+			order_item oi,
+			mrht_goods mg,
+			`order` o
+		WHERE
+			mg.id = oi.goods_id
+			and o.order_type = 1
+			and oi.order_no = #{orderNo}
+			and o.order_no =oi.order_no
+	</select>
+
+    <select id="getByMap" resultMap="orderItemMap" parameterType="java.util.Map">
+		select
+			oi.id,
+			oi.order_no,
+			mg.goods_name as goodsName,
+			CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),'/',mg.goods_image) as goodsImage,
+			oi.goods_id,
+			oi.num,
+			oi.unit_price,
+			oi.pay_price
+		from order_item oi,mrht_goods mg
+		<where>
+			oi.goods_id = mg.id
+			<if test="orderNo != null " >
+				and oi.order_no = #{orderNo}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="orderItemMap" parameterType="com.cndinuo.domain.OrderItem">
+		select <include refid="cols"/> from order_item  orderItem
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="orderItemMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from order_item  orderItem
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from order_item  orderItem
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from order_item  orderItem
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from order_item  orderItem
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+	<select id="getGoodsByOrderNo" resultMap="orderItemMap" parameterType="java.util.Map">
+		SELECT
+			oi.order_no,
+			oi.num,
+			oi.pay_price,
+			o.order_time,
+			mg.id AS goodsId,
+			mg.goods_name AS goodsName,
+			CONCAT((select `value` from sys_setting where deleted = 0 AND `key` = 'img_server'),'/',mg.goods_image) AS goodsImage,
+			mg.goods_spec AS goodsSpec,
+			oi.num AS num,
+			oi.pay_price AS payPrice
+		FROM
+			`order` o, order_item oi, mrht_goods mg
+		WHERE
+			oi.order_no = #{orderNo}
+		and oi.order_no = o.order_no
+		and oi.goods_id = mg.id
+	</select>
+
+	<select id="getRefundByOrderNo" resultMap="orderItemMap" parameterType="java.util.Map">
+		SELECT
+			orr.order_no,
+			orr.ret_num,
+			orr.ret_price,
+			orr.actual_amount,
+			orr.ret_status,
+			orr.ret_reason,
+			orr.ret_time,
+			mg.id AS goodsId,
+			mg.goods_name AS goodsName,
+			mg.goods_spec AS goodsSpec,
+			CONCAT((select `value` from sys_setting where deleted = 0 AND `key` = 'img_server'),'/',mg.goods_image) AS goodsImage
+		FROM
+			order_return orr, order_item oi, mrht_goods mg
+		WHERE
+			orr.order_no = #{orderNo}
+		AND orr.order_no = oi.order_no
+		AND oi.goods_id = mg.id
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.OrderItem" useGeneratedKeys="true" keyProperty="id">
+		insert into order_item
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" orderNo != null and orderNo != ''">
+				order_no,
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				goods_id,
+			</if>
+			<if test=" num != null and num != ''">
+				num,
+			</if>
+			<if test=" unitPrice != null and unitPrice != ''">
+				unit_price,
+			</if>
+			<if test=" payPrice != null and payPrice != ''">
+				pay_price
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				#{goodsId,jdbcType=INTEGER},
+			</if>
+			<if test=" num != null and num != ''">
+				#{num,jdbcType=INTEGER},
+			</if>
+			<if test=" unitPrice != null and unitPrice != ''">
+				#{unitPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" payPrice != null and payPrice != ''">
+				#{payPrice,jdbcType=DECIMAL}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.OrderItem">
+		update order_item orderItem
+		<set>
+			<if test=" orderNo != null and orderNo != ''">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				goods_id = #{goodsId,jdbcType=INTEGER},
+			</if>
+			<if test=" num != null and num != ''">
+				num = #{num,jdbcType=INTEGER},
+			</if>
+			<if test=" unitPrice != null and unitPrice != ''">
+				unit_price = #{unitPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" payPrice != null and payPrice != ''">
+				pay_price = #{payPrice,jdbcType=DECIMAL}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update order_item  orderItem set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update order_item orderItem set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update order_item orderItem set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.OrderItem">
+		update order_item orderItem set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

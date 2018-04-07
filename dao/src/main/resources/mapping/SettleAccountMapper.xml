@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SettleAccountDao">
+    <resultMap id="settleAccountMap" type="com.cndinuo.domain.SettleAccount">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtName" column="mrht_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="settleNo" column="settle_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="salesAmount" column="sales_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="retAmount" column="ret_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="empAmount" column="emp_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="settleAmount" column="settle_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="deliveryFee" column="delivery_fee" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="settleStatus" column="settle_status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="settlePeriod" column="settle_period" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="rate" column="rate" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="settleTime" column="settle_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mrht_id,
+		mrht_name,
+		settle_no,
+		sales_amount,
+        ret_amount,
+		emp_amount,
+		settle_amount,
+		delivery_fee,
+		settle_status,
+		settle_period,
+		rate,
+		create_time,
+		settle_time
+	</sql>
+
+	<select id="getLastSettleNo" resultType="java.lang.Integer">
+		select id from settle_account  settleAccount order by id desc limit 1
+	</select>
+
+	<select id="getSettleOrderBySettleNo" parameterType="java.lang.String" resultType="com.cndinuo.domain.Order">
+        SELECT
+            o.order_no AS orderNo,
+            o.mrht_name AS mrhtName,
+            o.order_status AS orderStatus,
+            o.delivery_type AS deliveryType,
+            o.delivery_fee AS deliveryFee,
+            o.sales_price AS salesPrice,
+            o.total_price AS totalPrice,
+            o.pay_type AS payType,
+            o.pay_time AS payTime,
+            o.settle_status AS settleStatus
+        FROM settle_account sa,settle_and_order sao,`order` o
+        WHERE sa.settle_no = sao.settle_no
+            AND sao.order_no = o.order_no
+            AND sao.type = 1
+            AND sa.settle_no = #{settleNo}
+	</select>
+
+	<select id="getSettleReturnOrderBySettleNo" parameterType="java.lang.String" resultType="com.cndinuo.domain.OrderReturn">
+        SELECT
+            o.ret_no AS retNo,
+            o.order_no AS orderNo,
+            o.ret_price AS retPrice,
+            o.actual_amount AS actualAmount,
+            o.ret_status AS retStatus,
+            o.ret_num AS retNum,
+            o.settle_status AS settleStatus,
+            (SELECT GROUP_CONCAT(`name`) FROM sys_dict WHERE `table` = 'order_return' AND `field` = 'ret_reason' AND find_in_set(`value`,o.ret_reason)) AS retReason,
+            o.remark
+        FROM settle_account sa,settle_and_order sao,order_return o
+        WHERE sa.settle_no = sao.settle_no
+            AND sao.order_no = o.order_no
+            AND sao.type = 2
+            AND sa.settle_no = #{settleNo}
+	</select>
+
+	<select id="getOrderDeliveryByMrhtId" parameterType="java.lang.Integer" resultType="com.cndinuo.domain.OrderDelivery">
+        SELECT
+            od.order_no AS orderNo,
+            od.delivery_fee AS deliveryFee,
+            od.delivery_time AS deliveryTime,
+            od.service_time AS serviceTime
+        FROM order_delivery od,`order` o,settle_and_order sao
+        WHERE od.order_no = o.order_no
+            AND o.order_no = sao.order_no
+            AND obj_id = #{mrhtId}
+            AND sao.type = 1
+	</select>
+
+    <select id="getById" resultMap="settleAccountMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from settle_account  settleAccount
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="settleAccountMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from settle_account  settleAccount
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="settleAccountMap" parameterType="com.cndinuo.domain.SettleAccount">
+		select <include refid="cols"/> from settle_account  settleAccount
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="settleAccountMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from settle_account  settleAccount
+		<where>
+			<if test="p != null and p.settleNo != null and p.settleNo != ''">
+				and settle_no = #{p.settleNo}
+			</if>
+			<if test="p != null and p.settlePeriod != null and p.settlePeriod != ''">
+				and to_days(settle_period) = to_days(#{p.settlePeriod})
+			</if>
+			<if test="p != null and p.mrhtId != null">
+				and mrht_id = #{p.mrhtId}
+			</if>
+		</where>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from settle_account  settleAccount
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from settle_account  settleAccount
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from settle_account  settleAccount
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.SettleAccount" useGeneratedKeys="true" keyProperty="id">
+		insert into settle_account
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				mrht_name,
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				settle_no,
+			</if>
+			<if test=" salesAmount != null and salesAmount != ''">
+				sales_amount,
+			</if>
+			<if test=" retAmount != null and retAmount != ''">
+                ret_amount,
+			</if>
+			<if test=" empAmount != null and empAmount != ''">
+				emp_amount,
+			</if>
+			<if test=" settleAmount != null and settleAmount != ''">
+				settle_amount,
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee,
+			</if>
+			<if test=" settleStatus != null and settleStatus != ''">
+				settle_status,
+			</if>
+			<if test=" settlePeriod != null and settlePeriod != ''">
+				settle_period,
+			</if>
+			<if test=" rate != null and rate != ''">
+				rate,
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time,
+			</if>
+			<if test=" settleTime != null and settleTime != ''">
+				settle_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				#{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				#{settleNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" salesAmount != null and salesAmount != ''">
+				#{salesAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" retAmount != null and retAmount != ''">
+				#{retAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" empAmount != null and empAmount != ''">
+				#{empAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" settleAmount != null and settleAmount != ''">
+				#{settleAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				#{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" settleStatus != null and settleStatus != ''">
+				#{settleStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" settlePeriod != null and settlePeriod != ''">
+				#{settlePeriod,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" rate != null and rate != ''">
+				#{rate,jdbcType=DECIMAL},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" settleTime != null and settleTime != ''">
+				#{settleTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.SettleAccount">
+		update settle_account settleAccount
+		<set>
+			<if test=" mrhtId != null">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				mrht_name = #{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				settle_no = #{settleNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" salesAmount != null and salesAmount != ''">
+				sales_amount = #{salesAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" retAmount != null and retAmount != ''">
+                ret_amount = #{retAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" empAmount != null and empAmount != ''">
+				emp_amount = #{empAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" settleAmount != null and settleAmount != ''">
+				settle_amount = #{settleAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee = #{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" settleStatus != null">
+				settle_status = #{settleStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" settlePeriod != null and settlePeriod != ''">
+				settle_period = #{settlePeriod,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" rate != null and rate != ''">
+				rate = #{rate,jdbcType=DECIMAL},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" settleTime != null and settleTime != ''">
+				settle_time = #{settleTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where id = #{id}
+	</update>
+    <update id="updateByMap">
+		update settle_account  settleAccount set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="updateOrderToSettled" parameterType="java.lang.String">
+        UPDATE `order`
+            SET settle_status = 3
+        WHERE
+            order_no IN (
+                SELECT
+                order_no
+                FROM
+                settle_and_order
+                WHERE
+                settle_no = #{settleNo}
+                AND type = 1
+            )
+	</update>
+
+    <update id="updateOrderReturnToSettled" parameterType="java.lang.String">
+        UPDATE order_return
+            SET settle_status = 3
+        WHERE
+            ret_no IN (
+                SELECT
+                ret_no
+                FROM
+                settle_and_order
+                WHERE
+                settle_no = #{settleNo}
+                AND type = 2
+            )
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update settle_account settleAccount set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update settle_account settleAccount set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SettleAccount">
+		update settle_account settleAccount set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SysAuthorDao">
+    <resultMap id="sysAuthorMap" type="com.cndinuo.domain.SysAuthor">
+        <result property="roleId" column="role_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="resId" column="res_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="resType" column="res_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		role_id,
+		res_id,
+		res_type
+	</sql>
+
+    <select id="getById" resultMap="sysAuthorMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sys_author  sysAuthor
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="sysAuthorMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from sys_author  sysAuthor
+		<where>
+			<if test="roleIds != null and roleIds != ''">
+				and role_id in (${roleIds})
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="sysAuthorMap" parameterType="com.cndinuo.domain.SysAuthor">
+		select <include refid="cols"/> from sys_author  sysAuthor
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="sysAuthorMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from sys_author  sysAuthor
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sys_author  sysAuthor
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from sys_author  sysAuthor
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sys_author  sysAuthor
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.SysAuthor" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_author (
+			role_id,
+			res_id,
+			res_type) 
+		value (
+			#{roleId,jdbcType=INTEGER},
+			#{resId,jdbcType=INTEGER},
+			#{resType,jdbcType=TINYINT}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.SysAuthor">
+		update sys_author sysAuthor set 
+			role_id = #{roleId,jdbcType=INTEGER},
+			res_id = #{resId,jdbcType=INTEGER},
+			res_type = #{resType,jdbcType=TINYINT}
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update sys_author  sysAuthor set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sys_author sysAuthor set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		DELETE FROM sys_author
+		<where>
+			<if test="roleIds != null and roleIds != ''" >
+				and role_id in (${roleIds})
+			</if>
+			<if test="roleId != null and roleId != ''" >
+				and role_id = #{roleId}
+			</if>
+		</where>
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SysAuthor">
+		update sys_author sysAuthor set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>gobuy</artifactId>
+        <groupId>com.cndinuo</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>api</artifactId>
+    <packaging>war</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cndinuo</groupId>
+            <artifactId>service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.7.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>api</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--开发环境配置-->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <project.compVersion>${project.version}</project.compVersion>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <!--数据库配置-->
+                <jdbc.driver.className>com.mysql.jdbc.Driver</jdbc.driver.className>
+                <jdbc.url>jdbc:mysql://out-cndinuo.mysql.rds.aliyuncs.com:3306/gobuy</jdbc.url>
+                <jdbc.username>cndinuo</jdbc.username>
+                <jdbc.password>1q2w3e4R</jdbc.password>
+                <max.active>30</max.active>
+                <initial.size>10</initial.size>
+                <max.wait>60000</max.wait>
+                <maxidle>20</maxidle>
+                <minidle>10</minidle>
+                <removeAbandoned.timeout>180</removeAbandoned.timeout>
+
+                <!-- 日志级别，一般由大到小分为 debug info warn error 四个级别，越大日志越详细 -->
+                <log4j.level>debug</log4j.level>
+                <!--日志存储路径，多个项目可以用同一个路径，在该路径下每个项目会自动创建以项目名称命名的子文件夹 -->
+                <log4j.path>D:/workspaces/logs</log4j.path>
+
+                <!--访问地址-->
+                <redis.host>39.108.158.227</redis.host>
+                <!--访问端口-->
+                <redis.port>6379</redis.port>
+                <!--注意，如果没有password，此处不设置值，但这一项要保留-->
+                <redis.password>cndinuo...</redis.password>
+                <!--最大空闲数，数据库连接的最大空闲时间。超过空闲时间，数据库连接将被标记为不可用，然后被释放。设为0表示无限制。-->
+                <redis.maxIdle>300</redis.maxIdle>
+                <!--连接池的最大数据库连接数。设为0表示无限制-->
+                <redis.maxActive>600</redis.maxActive>
+                <!--最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。-->
+                <redis.maxWait>1000</redis.maxWait>
+                <!--在borrow一个jedis实例时，是否提前进行alidate操作；如果为true，则得到的jedis实例均是可用的；-->
+                <redis.testOnBorrow>true</redis.testOnBorrow>
+                <redis.timeout>100000</redis.timeout>
+
+                <!--kafka配置-->
+                <bootstrap.servers>39.108.158.227:9092</bootstrap.servers>
+                <group.id>dev</group.id>
+                <retries>10</retries>
+                <batch.size>16384</batch.size>
+                <linger.ms>1</linger.ms>
+                <buffer.memory>33554432</buffer.memory>
+                <enable.auto.commit>true</enable.auto.commit>
+                <auto.commit.interval.ms>1000</auto.commit.interval.ms>
+                <session.timeout.ms>15000</session.timeout.ms>
+
+                <!--友盟推送测试生产标识-->
+                <productionMode>false</productionMode>
+
+                <!--支付宝回调地址-->
+                <alipay.notifyurl>http://39.108.158.227:9090/alipay/alipayback</alipay.notifyurl>
+                <!--微信支付回调地址-->
+                <wxpay.notifyurl>http://39.108.158.227:9090/wx/wxback</wxpay.notifyurl>
+            </properties>
+        </profile>
+
+        <!--测试环境配置-->
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <project.compVersion>${project.version}</project.compVersion>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <!--数据库配置-->
+                <jdbc.driver.className>com.mysql.jdbc.Driver</jdbc.driver.className>
+                <jdbc.url>jdbc:mysql://in-cndinuo.mysql.rds.aliyuncs.com:3306/gobuy</jdbc.url>
+                <jdbc.username>cndinuo</jdbc.username>
+                <jdbc.password>1q2w3e4R</jdbc.password>
+                <max.active>30</max.active>
+                <initial.size>10</initial.size>
+                <max.wait>60000</max.wait>
+                <maxidle>20</maxidle>
+                <minidle>10</minidle>
+                <removeAbandoned.timeout>180</removeAbandoned.timeout>
+
+                <!-- 日志级别，一般由大到小分为 debug info warn error 四个级别，越大日志越详细 -->
+                <log4j.level>debug</log4j.level>
+                <!--日志存储路径，多个项目可以用同一个路径，在该路径下每个项目会自动创建以项目名称命名的子文件夹 -->
+                <log4j.path>/data/api/logs</log4j.path>
+
+                <!--访问地址-->
+                <redis.host>172.18.74.224</redis.host>
+                <!--访问端口-->
+                <redis.port>6379</redis.port>
+                <!--注意，如果没有password，此处不设置值，但这一项要保留-->
+                <redis.password>cndinuo...</redis.password>
+                <!--最大空闲数，数据库连接的最大空闲时间。超过空闲时间，数据库连接将被标记为不可用，然后被释放。设为0表示无限制。-->
+                <redis.maxIdle>300</redis.maxIdle>
+                <!--连接池的最大数据库连接数。设为0表示无限制-->
+                <redis.maxActive>600</redis.maxActive>
+                <!--最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。-->
+                <redis.maxWait>1000</redis.maxWait>
+                <!--在borrow一个jedis实例时，是否提前进行alidate操作；如果为true，则得到的jedis实例均是可用的；-->
+                <redis.testOnBorrow>true</redis.testOnBorrow>
+                <redis.timeout>100000</redis.timeout>
+
+                <!--kafka配置-->
+                <bootstrap.servers>172.18.74.224:9092</bootstrap.servers>
+                <group.id>test</group.id>
+                <retries>10</retries>
+                <batch.size>16384</batch.size>
+                <linger.ms>1</linger.ms>
+                <buffer.memory>33554432</buffer.memory>
+                <enable.auto.commit>true</enable.auto.commit>
+                <auto.commit.interval.ms>1000</auto.commit.interval.ms>
+                <session.timeout.ms>15000</session.timeout.ms>
+
+                <!--友盟推送测试生产标识-->
+                <productionMode>false</productionMode>
+
+                <!--支付宝回调地址-->
+                <alipay.notifyurl>http://39.108.158.227:9090/alipay/alipayback</alipay.notifyurl>
+                <!--微信支付回调地址-->
+                <wxpay.notifyurl>http://39.108.158.227:9090/wx/wxback</wxpay.notifyurl>
+            </properties>
+        </profile>
+
+        <!--生产环境配置-->
+        <profile>
+            <id>pro</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <project.compVersion>${project.version}</project.compVersion>
+                <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+                <!--数据库配置-->
+                <jdbc.driver.className>com.mysql.jdbc.Driver</jdbc.driver.className>
+                <jdbc.url>jdbc:mysql://in-cndinuo.mysql.rds.aliyuncs.com:3306/gobuy</jdbc.url>
+                <jdbc.username>cndinuo</jdbc.username>
+                <jdbc.password>1q2w3e4R</jdbc.password>
+                <max.active>30</max.active>
+                <initial.size>10</initial.size>
+                <max.wait>60000</max.wait>
+                <maxidle>20</maxidle>
+                <minidle>10</minidle>
+                <removeAbandoned.timeout>180</removeAbandoned.timeout>
+
+                <!-- 日志级别，一般由大到小分为 debug info warn error 四个级别，越大日志越详细 -->
+                <log4j.level>info</log4j.level>
+                <!--日志存储路径，多个项目可以用同一个路径，在该路径下每个项目会自动创建以项目名称命名的子文件夹 -->
+                <log4j.path>/data/api/logs</log4j.path>
+
+                <!--访问地址-->
+                <redis.host>172.18.74.224</redis.host>
+                <!--访问端口-->
+                <redis.port>6379</redis.port>
+                <!--注意，如果没有password，此处不设置值，但这一项要保留-->
+                <redis.password>cndinuo...</redis.password>
+                <!--最大空闲数，数据库连接的最大空闲时间。超过空闲时间，数据库连接将被标记为不可用，然后被释放。设为0表示无限制。-->
+                <redis.maxIdle>300</redis.maxIdle>
+                <!--连接池的最大数据库连接数。设为0表示无限制-->
+                <redis.maxActive>600</redis.maxActive>
+                <!--最大建立连接等待时间。如果超过此时间将接到异常。设为-1表示无限制。-->
+                <redis.maxWait>1000</redis.maxWait>
+                <!--在borrow一个jedis实例时，是否提前进行alidate操作；如果为true，则得到的jedis实例均是可用的；-->
+                <redis.testOnBorrow>true</redis.testOnBorrow>
+                <redis.timeout>100000</redis.timeout>
+
+                <!--kafka配置-->
+                <bootstrap.servers>172.18.74.224:9092</bootstrap.servers>
+                <group.id>pro</group.id>
+                <retries>10</retries>
+                <batch.size>16384</batch.size>
+                <linger.ms>1</linger.ms>
+                <buffer.memory>33554432</buffer.memory>
+                <enable.auto.commit>true</enable.auto.commit>
+                <auto.commit.interval.ms>1000</auto.commit.interval.ms>
+                <session.timeout.ms>15000</session.timeout.ms>
+
+                <!--友盟推送测试生产标识-->
+                <productionMode>true</productionMode>
+
+                <!--支付宝回调地址-->
+                <alipay.notifyurl>http://39.108.158.227:9090/alipay/alipayback</alipay.notifyurl>
+                <!--微信支付回调地址-->
+                <wxpay.notifyurl>http://39.108.158.227:9090/wx/wxback</wxpay.notifyurl>
+            </properties>
+        </profile>
+    </profiles>
+</project>

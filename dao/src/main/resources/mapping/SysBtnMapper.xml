@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SysBtnDao">
+    <resultMap id="sysBtnMap" type="com.cndinuo.domain.SysBtn">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="btnName" column="btn_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="btnCode" column="btn_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="btnUrl" column="btn_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="menuId" column="menu_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		btn_name,
+		btn_code,
+		btn_url,
+		menu_id
+	</sql>
+
+    <select id="getById" resultMap="sysBtnMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sys_btn  sysBtn
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="sysBtnMap" parameterType="java.util.Map">
+		select
+			b.id,
+			b.btn_name,
+			b.btn_code,
+			b.btn_url,
+			b.menu_id
+		from sys_btn b
+		<if test="resType != null">
+			,sys_author a
+		</if>
+		<where>
+			<if test="menuId != null and menuId != ''">
+				and menu_id = #{menuId}
+			</if>
+			<if test="roleIds != null and roleIds != ''">
+				and a.role_id in (${roleIds})
+			</if>
+			<if test="resType != null and resType != ''">
+				and a.res_type = #{resType}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="sysBtnMap" parameterType="com.cndinuo.domain.SysBtn">
+		select <include refid="cols"/> from sys_btn  sysBtn
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="sysBtnMap" parameterType="com.cndinuo.page.Page">
+		select
+			sysBtn.id,
+			btn_name,
+			btn_code,
+			btn_url,
+			menu_id,
+			menu_name as menuName
+		from sys_btn sysBtn,sys_menu sysMenu
+		<where>
+			sysBtn.menu_id = sysMenu.id
+			<if test="p != null and p.menuId !=null and p.menuId != ''">
+				and sysBtn.menu_id = #{p.menuId}
+			</if>
+			<if test="p != null and p.btnName !=null and p.btnName != ''">
+				and sysBtn.btn_name = #{p.btnName}
+			</if>
+			<if test="p != null and p.btnCode !=null and p.btnCode != ''">
+				and sysBtn.btn_code = #{p.btnCode}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sys_btn  sysBtn
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from sys_btn  sysBtn
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sys_btn  sysBtn
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.SysBtn" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_btn (
+			btn_name,
+			btn_code,
+			btn_url,
+			menu_id) 
+		value (
+			#{btnName,jdbcType=VARCHAR},
+			#{btnCode,jdbcType=VARCHAR},
+			#{btnUrl,jdbcType=VARCHAR},
+			#{menuId,jdbcType=INTEGER}
+		)
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.SysBtn">
+		update sys_btn sysBtn set 
+			btn_name = #{btnName,jdbcType=VARCHAR},
+			btn_code = #{btnCode,jdbcType=VARCHAR},
+			btn_url = #{btnUrl,jdbcType=VARCHAR},
+			menu_id = #{menuId,jdbcType=INTEGER}
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update sys_btn  sysBtn set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sys_btn sysBtn set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		DELETE FROM sys_btn WHERE id in (${ids})
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SysBtn">
+		update sys_btn sysBtn set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

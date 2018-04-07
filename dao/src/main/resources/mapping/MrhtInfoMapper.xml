@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtInfoDao">
+    <resultMap id="mrhtInfoMap" type="com.cndinuo.domain.MrhtInfo">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="goodsType" column="goods_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="storeImage" column="store_image" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="province" column="province" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="city" column="city" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="district" column="district" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="address" column="address" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="lng" column="lng" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="lat" column="lat" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="compactNo" column="compact_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="compactName" column="compact_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="compactExpiryDate" column="compact_expiry_date" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="compactImage" column="compact_image" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="busLicense" column="bus_license" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="busCert" column="bus_cert" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="tobaccoLicense" column="tobacco_license" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="legalPersonCard" column="legal_person_card" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="financialContact" column="financial_contact" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="contactNum" column="contact_num" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="openBank" column="open_bank" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="accountName" column="account_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="accountNum" column="account_num" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="hasTobacco" column="has_tobacco" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+		<result property="officeTime" column="office_time" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		mrht_id,
+		goods_type,
+		store_image,
+		mobile,
+		province,
+		city,
+		district,
+		address,
+		lng,
+		lat,
+		compact_no,
+		compact_name,
+		compact_expiry_date,
+		compact_image,
+		bus_license,
+		bus_cert,
+		tobacco_license,
+		legal_person_card,
+		financial_contact,
+		contact_num,
+		open_bank,
+		account_name,
+		account_num,
+		has_tobacco,
+		office_time
+	</sql>
+
+    <select id="getById" resultMap="mrhtInfoMap" parameterType="java.lang.Integer">
+		select
+			id,
+			mrht_id,
+			goods_type,
+			store_image,
+			mobile,
+			province,
+			city,
+			district,
+			lng,
+			lat,
+			compact_no,
+			compact_name,
+			compact_expiry_date,
+			compact_image,
+			bus_license,
+			bus_cert,
+			legal_person_card,
+			financial_contact,
+			tobacco_license,
+			contact_num,
+			open_bank,
+			account_name,
+			account_num,
+            has_tobacco,
+			office_time,
+			CONCAT((SELECT merger_name FROM sys_area a WHERE m.district = a.id),m.address) AS address
+		from mrht_info m where id = #{id}
+	</select>
+
+
+	<select id="getByMrhtId" resultMap="mrhtInfoMap" parameterType="java.lang.Integer">
+        select
+            id,
+            mrht_id,
+			(select group_concat(name) from mrht_goods_class c where find_in_set(c.code,m.goods_type)) as typeName,
+            goods_type,
+			store_image,
+            mobile,
+            province,
+            city,
+            district,
+            lng,
+            lat,
+            compact_no,
+            compact_name,
+            compact_expiry_date,
+            compact_image,
+            bus_license,
+			CONCAT((SELECT `value` from sys_setting where `key` = 'img_server' and deleted = 0),'/',m.bus_cert) AS bus_cert,
+            legal_person_card,
+            financial_contact,
+			tobacco_license,
+            contact_num,
+            open_bank,
+            account_name,
+            account_num,
+            has_tobacco,
+			office_time,
+			CONCAT((SELECT merger_name FROM sys_area a WHERE m.district = a.id),m.address) AS address
+        from mrht_info m where mrht_id = #{mrhtId}
+	</select>
+
+    <select id="getByMap" resultMap="mrhtInfoMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_info  mrhtInfo
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="mrhtInfoMap" parameterType="com.cndinuo.domain.MrhtInfo">
+		select <include refid="cols"/> from mrht_info  mrhtInfo
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="mrhtInfoMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mrht_info  mrhtInfo
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_info  mrhtInfo
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_info  mrhtInfo
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_info  mrhtInfo
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtInfo" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_info (
+			mrht_id,
+			goods_type,
+			store_image,
+			mobile,
+			province,
+			city,
+			district,
+			address,
+			lng,
+			lat,
+			compact_no,
+			compact_name,
+			compact_expiry_date,
+			compact_image,
+			bus_license,
+			bus_cert,
+			tobacco_license,
+			legal_person_card,
+			financial_contact,
+			contact_num,
+			open_bank,
+			account_name,
+			account_num,
+			has_tobacco,
+			office_time)
+		value (
+			#{mrhtId,jdbcType=INTEGER},
+			#{goodsType,jdbcType=VARCHAR},
+			#{storeImage,jdbcType=VARCHAR},
+			#{mobile,jdbcType=VARCHAR},
+			#{province,jdbcType=INTEGER},
+			#{city,jdbcType=INTEGER},
+			#{district,jdbcType=INTEGER},
+			#{address,jdbcType=VARCHAR},
+			#{lng,jdbcType=VARCHAR},
+			#{lat,jdbcType=VARCHAR},
+			#{compactNo,jdbcType=VARCHAR},
+			#{compactName,jdbcType=VARCHAR},
+			#{compactExpiryDate,jdbcType=VARCHAR},
+			#{compactImage,jdbcType=VARCHAR},
+			#{busLicense,jdbcType=VARCHAR},
+			#{busCert,jdbcType=VARCHAR},
+			#{tobaccoLicense,jdbcType=VARCHAR},
+			#{legalPersonCard,jdbcType=VARCHAR},
+			#{financialContact,jdbcType=VARCHAR},
+			#{contactNum,jdbcType=VARCHAR},
+			#{openBank,jdbcType=VARCHAR},
+			#{accountName,jdbcType=VARCHAR},
+			#{accountNum,jdbcType=VARCHAR},
+			#{hasTobacco,jdbcType=TINYINT},
+			#{officeTime,jdbcType=VARCHAR}
+		)
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtInfo">
+		update mrht_info mrhtInfo set
+			mrht_id = #{mrhtId,jdbcType=INTEGER},
+			goods_type = #{goodsType,jdbcType=VARCHAR},
+			store_image = #{storeImage,jdbcType=VARCHAR},
+			mobile = #{mobile,jdbcType=VARCHAR},
+			province = #{province,jdbcType=INTEGER},
+			city = #{city,jdbcType=INTEGER},
+			district = #{district,jdbcType=INTEGER},
+			address = #{address,jdbcType=VARCHAR},
+			lng = #{lng,jdbcType=VARCHAR},
+			lat = #{lat,jdbcType=VARCHAR},
+			compact_no = #{compactNo,jdbcType=VARCHAR},
+			compact_name = #{compactName,jdbcType=VARCHAR},
+			compact_expiry_date = #{compactExpiryDate,jdbcType=VARCHAR},
+			compact_image = #{compactImage,jdbcType=VARCHAR},
+			bus_license = #{busLicense,jdbcType=VARCHAR},
+			bus_cert = #{busCert,jdbcType=VARCHAR},
+			bus_cert = #{tobaccoLicense,jdbcType=VARCHAR},
+			legal_person_card = #{legalPersonCard,jdbcType=VARCHAR},
+			financial_contact = #{financialContact,jdbcType=VARCHAR},
+			tobacco_license = #{tobaccoLicense,jdbcType=VARCHAR},
+			contact_num = #{contactNum,jdbcType=VARCHAR},
+			open_bank = #{openBank,jdbcType=VARCHAR},
+			account_name = #{accountName,jdbcType=VARCHAR},
+			account_num = #{accountNum,jdbcType=VARCHAR},
+			has_tobacco = #{hasTobacco,jdbcType=TINYINT},
+			office_time = #{officeTime,jdbcType=VARCHAR}
+		 where id= #{id}
+	</update>
+
+    <update id="updateByMap">
+		update mrht_info  mrhtInfo set
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="updateByMrhtAccount" parameterType="com.cndinuo.domain.MrhtInfo">
+		update mrht_info  mrhtInfo set
+			financial_contact = #{financialContact,jdbcType=VARCHAR},
+			contact_num = #{contactNum,jdbcType=VARCHAR},
+			open_bank = #{openBank,jdbcType=VARCHAR},
+			account_name = #{accountName,jdbcType=VARCHAR},
+			account_num = #{accountNum,jdbcType=VARCHAR}
+		where id = #{id}
+	</update>
+	<update id="updateByStoreImage" parameterType="com.cndinuo.domain.MrhtInfo">
+		update mrht_info  mrhtInfo set
+		store_image = #{storeImage,jdbcType=VARCHAR}
+		where id = #{id}
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_info mrhtInfo set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_info mrhtInfo set deleted=1
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtInfo">
+		update mrht_info mrhtInfo set deleted=1
+		where id=#{id}
+	</update>
+
+</mapper>

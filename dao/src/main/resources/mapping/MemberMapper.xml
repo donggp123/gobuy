@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MemberDao">
+    <resultMap id="memberMap" type="com.cndinuo.domain.Member">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mobile" column="mobile" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="password" column="password" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="openId" column="open_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="logType" column="log_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="mberType" column="mber_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="deviceType" column="device_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="salt" column="salt" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="initPwd" column="init_pwd" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="token" column="token" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="deviceToken" column="device_token" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mobile,
+		password,
+		open_id,
+		log_type,
+		mber_type,
+		device_type,
+		device_token,
+		salt,
+		init_pwd,
+		token
+	</sql>
+
+	<select id="getByMobile" resultMap="memberMap" parameterType="java.lang.String">
+		select <include refid="cols"/> from member  member
+		 where mobile = #{mobile}
+	</select>
+
+	<select id="getByToken" resultMap="memberMap" parameterType="java.lang.String">
+		select <include refid="cols"/> from member  member
+		 where token = #{token}
+	</select>
+
+    <select id="getById" resultMap="memberMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from member  member
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="memberMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from member  member
+		<where>
+			<if test="mobile != null and mobile != ''" >
+				and mobile = #{mobile}
+			</if>
+			<if test="openId != null and openId != ''" >
+				and open_id = #{openId}
+			</if>
+			<if test="logType != null and logType != ''" >
+				and log_type = #{logType}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="memberMap" parameterType="com.cndinuo.domain.Member">
+		select <include refid="cols"/> from member  member
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="memberMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from member  member
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from member  member
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from member  member
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from member  member
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.Member" useGeneratedKeys="true" keyProperty="id">
+		insert into member
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mobile != null and mobile != ''">
+				mobile,
+			</if>
+			<if test=" password != null and password != ''">
+				password,
+			</if>
+			<if test=" openId != null and openId != ''">
+				open_id,
+			</if>
+			<if test=" logType != null and logType != ''">
+				log_type,
+			</if>
+			<if test=" mberType != null and mberType != ''">
+				mber_type,
+			</if>
+			<if test=" deviceType != null and deviceType != ''">
+				device_type,
+			</if>
+			<if test=" deviceToken != null and deviceToken != ''">
+				device_token,
+			</if>
+			<if test=" salt != null and salt != ''">
+				salt,
+			</if>
+			<if test=" initPwd != null and initPwd != ''">
+				init_pwd,
+			</if>
+			<if test=" token != null and token != ''">
+				token
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mobile != null and mobile != ''">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" password != null and password != ''">
+				#{password,jdbcType=VARCHAR},
+			</if>
+			<if test=" openId != null and openId != ''">
+				#{openId,jdbcType=VARCHAR},
+			</if>
+			<if test=" logType != null and logType != ''">
+				#{logType,jdbcType=TINYINT},
+			</if>
+			<if test=" mberType != null and mberType != ''">
+				#{mberType,jdbcType=TINYINT},
+			</if>
+			<if test=" deviceToken != null and deviceToken != ''">
+				#{deviceToken,jdbcType=VARCHAR},
+			</if>
+			<if test=" salt != null and salt != ''">
+				#{salt,jdbcType=VARCHAR},
+			</if>
+			<if test=" initPwd != null and initPwd != ''">
+				#{initPwd,jdbcType=VARCHAR},
+			</if>
+			<if test=" token != null and token != ''">
+				#{token,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.Member">
+		update member member
+		<set>
+			<if test=" mobile != null and mobile != ''">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" password != null and password != ''">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test=" openId != null and openId != ''">
+				open_id = #{openId,jdbcType=VARCHAR},
+			</if>
+			<if test=" logType != null and logType != ''">
+				log_type = #{logType,jdbcType=TINYINT},
+			</if>
+			<if test=" mberType != null and mberType != ''">
+				mber_type = #{mberType,jdbcType=TINYINT},
+			</if>
+			<if test=" deviceType != null and deviceType != ''">
+				device_type = #{deviceType,jdbcType=TINYINT},
+			</if>
+			<if test=" deviceToken != null and deviceToken != ''">
+				device_token = #{deviceToken,jdbcType=VARCHAR},
+			</if>
+			<if test=" salt != null and salt != ''">
+				salt = #{salt,jdbcType=VARCHAR},
+			</if>
+			<if test=" initPwd != null and initPwd != ''">
+				init_pwd = #{initPwd,jdbcType=VARCHAR},
+			</if>
+			<if test=" token != null and token != ''">
+				token = #{token,jdbcType=VARCHAR}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap" parameterType="java.util.Map">
+		update member
+		<set>
+			<if test="mberType != null" >
+				mber_type = #{mberType},
+			</if>
+			<if test="deviceType != null" >
+				device_type = #{deviceType},
+			</if>
+			<if test="deviceToken != null and deviceToken != ''" >
+				device_token = #{deviceToken}
+			</if>
+		</set>
+
+		<where>
+			and id = #{mberId}
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update member member set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update member member set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.Member">
+		update member member set deleted=1 
+		where id=#{id}
+	</update>
+
+</mapper>

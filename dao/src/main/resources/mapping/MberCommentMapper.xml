@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MberCommentDao">
+    <resultMap id="mberCommentMap" type="com.cndinuo.domain.MberComment">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="orderNo" column="order_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="goodsId" column="goods_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="deliClerkId" column="deli_clerk_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="comType" column="com_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="comLevel" column="com_level" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="comImage" column="com_image" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="content" column="content" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="comTime" column="com_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="reconsider" column="reconsider" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		order_no,
+		mber_id,
+		mrht_id,
+		goods_id,
+		deli_clerk_id,
+		com_type,
+		com_level,
+		com_image,
+		content,
+		com_time,
+		reconsider
+	</sql>
+	<select id="getCountByComment" resultType="java.util.Map" parameterType="java.util.Map">
+		select (select count(1) as count1 from mber_comment where mrht_id = #{id} and com_type = 2) as total,
+		(select count(1) as count2 from mber_comment where mrht_id = #{id} and com_level &lt;= 2 and com_type = 2) as bad,
+		(select count(1) as count3 from mber_comment where mrht_id = #{id} and com_level &gt;= 3 and com_type = 2) as praise
+	</select>
+	<!--用户评价列表-->
+	<select id="getCommentByMap" parameterType="com.cndinuo.page.Page" resultType="java.util.Map">
+		SELECT
+			m.id as mrhtId,
+			m.mrht_name as mrhtName,
+			CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),'/',mi.store_image) AS storeImage,
+			mc.com_level as comLevel,
+			mc.com_image AS comImage,
+			mc.com_time as comTime,
+			o.order_no as orderNo,
+			o.total_price as totalPrice,
+			(select SUM(oi.num) from order_item as oi where o.order_no = oi.order_no) as num,
+			(select COUNT(mrht_id) from mber_favorite mf where mf.mrht_id = m.id ) as favoriteNum,
+			mc.content
+		FROM
+			merchant m,
+			mrht_info mi,
+			`order` o,
+			mber_comment mc
+		WHERE
+			m.id = mi.mrht_id
+			AND m.mrht_type = 2
+			AND m.deleted = 0
+			AND m.id = mc.mrht_id
+			AND mc.com_type = 2
+			AND o.mber_id = mc.mber_id
+			AND o.mrht_id = mi.mrht_id
+			AND o.order_no = mc.order_no
+			AND mc.mber_id = #{p.mberId}
+		order by mc.com_time desc
+	</select>
+	<!--商家商品评价列表-->
+	<select id="getGoodsByCommList" parameterType="com.cndinuo.page.Page" resultType="java.util.Map">
+		SELECT
+			mc.id,
+			mi.nick_name as nickName,
+            if(m.log_type = 1,CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),"/",mi.head_icon),mi.head_icon) as headIcon,
+			mc.com_time as comTime,
+			mc.content,
+			mc.com_level as comLevel,
+			mc.com_image as comImage,
+			((select track_time from order_track where order_no = mc.order_no and track_status = 6)-(select track_time from order_track where order_no = mc.order_no and track_status = 5)) as endTime
+		FROM
+			mber_comment mc,
+			member m,
+			mber_info mi
+		WHERE
+			mc.mrht_id = #{p.id}
+			AND mc.mber_id = mi.mber_id
+			AND m.id = mi.mber_id
+            AND mc.com_type = 2
+        <if test="p.comLevel == 2">
+            and mc.com_level &lt;= #{p.comLevel}
+        </if>
+        <if test="p.comLevel == 3">
+            and mc.com_level &gt;= #{p.comLevel}
+        </if>
+	</select>
+
+    <select id="getById" resultMap="mberCommentMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mber_comment  mberComment
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mberCommentMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mber_comment  mberComment
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mberCommentMap" parameterType="com.cndinuo.domain.MberComment">
+		select <include refid="cols"/> from mber_comment  mberComment
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mberCommentMap" parameterType="com.cndinuo.page.Page">
+		select
+			mc.id,
+			mc.order_no,
+			mc.mber_id,
+			mi.nick_name as nickName,
+			mc.goods_id,
+			mg.goods_name as goodsName,
+			mc.com_type,
+			mc.com_level,
+			CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),"/",mc.com_image) as com_image,
+			mc.content,
+			mc.com_time
+		from
+			mber_comment mc,
+		    mber_info mi,
+		    mrht_goods mg
+		<where>
+			mc.mrht_id = #{p.mrhtId}
+			and mc.com_type = 2
+			and mi.mber_id = mc.mber_id
+			and mg.id = mc.goods_id
+		</where>
+
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mber_comment  mberComment
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mber_comment  mberComment
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mber_comment  mberComment
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+	<select id="getCommentListForGoods" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT
+			mi.nick_name AS nickName,
+			mc.content AS content,
+			mc.com_time AS comTime,
+			if(m.log_type = 1,CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),"/",mi.head_icon),mi.head_icon) as headIcon
+		FROM
+			mber_comment mc, mber_info mi, member m
+		WHERE
+			mc.com_type = #{comType}
+		AND m.id = mi.mber_id
+		AND mc.mrht_id = #{mrhtId}
+		AND mc.goods_id = #{goodsId}
+		AND mc.mber_id = mi.mber_id
+	</select>
+
+	<select id="getSatisfactionRiderCommonList" resultMap="mberCommentMap" parameterType="com.cndinuo.page.Page">
+		SELECT
+			com_level,
+			content
+		FROM mber_comment
+		WHERE
+			com_level >= 3
+			and deli_clerk_id = #{p.deliClerkId}
+			AND com_type = #{p.comType}
+	</select>
+
+	<select id="getGeneralRiderCommonList" resultMap="mberCommentMap" parameterType="com.cndinuo.page.Page">
+		SELECT
+            id,
+			com_level,
+			content,
+			reconsider
+		FROM mber_comment
+		WHERE
+			com_level &lt;= 2
+			and deli_clerk_id = #{p.deliClerkId}
+			AND com_type = #{p.comType}
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.MberComment" useGeneratedKeys="true" keyProperty="id">
+		insert into mber_comment
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				order_no,
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				goods_id,
+			</if>
+			<if test=" deliClerkId != null and deliClerkId != ''">
+				deli_clerk_id,
+			</if>
+			<if test=" comType != null and comType != ''">
+				com_type,
+			</if>
+			<if test=" comLevel != null and comLevel != ''">
+				com_level,
+			</if>
+			<if test=" comImage != null and comImage != ''">
+				com_image,
+			</if>
+			<if test=" content != null and content != ''">
+				content,
+			</if>
+			<if test=" comTime != null and comTime != ''">
+				com_time,
+			</if>
+			<if test=" reconsider != null and reconsider != ''">
+				reconsider
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				#{goodsId,jdbcType=VARCHAR},
+			</if>
+			<if test=" deliClerkId != null and deliClerkId != ''">
+				#{deliClerkId,jdbcType=INTEGER},
+			</if>
+			<if test=" comType != null and comType != ''">
+				#{comType,jdbcType=TINYINT},
+			</if>
+			<if test=" comLevel != null and comLevel != ''">
+				#{comLevel,jdbcType=TINYINT},
+			</if>
+			<if test=" comImage != null and comImage != ''">
+				#{comImage,jdbcType=VARCHAR},
+			</if>
+			<if test=" content != null and content != ''">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test=" comTime != null and comTime != ''">
+				#{comTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" reconsider != null and reconsider != ''">
+				#{reconsider,jdbcType=TINYINT}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MberComment">
+		update mber_comment mberComment
+		<set>
+			<if test=" orderNo != null and orderNo != ''">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" goodsId != null and goodsId != ''">
+				goods_id = #{goodsId,jdbcType=VARCHAR},
+			</if>
+			<if test=" deliClerkId != null and deliClerkId != ''">
+				deli_clerk_id = #{deliClerkId,jdbcType=INTEGER},
+			</if>
+			<if test=" comType != null and comType != ''">
+				com_type = #{comType,jdbcType=TINYINT},
+			</if>
+			<if test=" comLevel != null and comLevel != ''">
+				com_level = #{comLevel,jdbcType=TINYINT},
+			</if>
+			<if test=" comImage != null and comImage != ''">
+				com_image = #{comImage,jdbcType=VARCHAR},
+			</if>
+			<if test=" content != null and content != ''">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test=" comTime != null and comTime != ''">
+				com_time = #{comTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" reconsider != null and reconsider != ''">
+				reconsider = #{reconsider,jdbcType=TINYINT}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update mber_comment  mberComment
+        <set>
+            <if test="reconsider != null">
+                reconsider = #{reconsider}
+            </if>
+        </set>
+        where id = #{comId}
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mber_comment mberComment set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mber_comment mberComment set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MberComment">
+		update mber_comment mberComment set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

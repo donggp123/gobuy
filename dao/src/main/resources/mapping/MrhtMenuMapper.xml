@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtMenuDao">
+    <resultMap id="mrhtMenuMap" type="com.cndinuo.domain.MrhtMenu">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="parentId" column="parent_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="menuName" column="menu_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="menuUrl" column="menu_url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mrhtType" column="mrht_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		parent_id,
+		menu_name,
+		menu_url,
+		mrht_type
+	</sql>
+
+	<select id="getMrhtMenuToSysMenu" parameterType="java.lang.Byte" resultType="com.cndinuo.domain.SysMenu">
+		SELECT
+			id,
+			parent_id AS parentId,
+			menu_name AS menuName,
+			menu_url AS menuUrl
+		FROM mrht_menu
+		<where>
+			<if test="parentId != null">
+				and parent_id = #{parentId}
+			</if>
+			<if test="type != null">
+				and mrht_type = #{type}
+			</if>
+		</where>
+	</select>
+
+    <select id="getById" resultMap="mrhtMenuMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mrht_menu  mrhtMenu
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="mrhtMenuMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_menu  mrhtMenu
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="mrhtMenuMap" parameterType="com.cndinuo.domain.MrhtMenu">
+		select <include refid="cols"/> from mrht_menu  mrhtMenu
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="mrhtMenuMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mrht_menu  mrhtMenu
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_menu  mrhtMenu
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_menu  mrhtMenu
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_menu  mrhtMenu
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtMenu" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_menu (
+			parent_id,
+			menu_name,
+			menu_url,
+			mrht_type) 
+		value (
+			#{parentId,jdbcType=INTEGER},
+			#{menuName,jdbcType=VARCHAR},
+			#{menuUrl,jdbcType=VARCHAR},
+			#{mrhtType,jdbcType=TINYINT}
+		)
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtMenu">
+		update mrht_menu mrhtMenu set
+			parent_id = #{parentId,jdbcType=INTEGER},
+			menu_name = #{menuName,jdbcType=VARCHAR},
+			menu_url = #{menuUrl,jdbcType=VARCHAR},
+			mrht_type = #{mrhtType,jdbcType=TINYINT}
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update mrht_menu  mrhtMenu set
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_menu mrhtMenu set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_menu mrhtMenu set deleted=1
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtMenu">
+		update mrht_menu mrhtMenu set deleted=1
+		where id=#{id}
+	</update>
+
+</mapper>

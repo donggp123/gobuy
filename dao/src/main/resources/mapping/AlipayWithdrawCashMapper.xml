@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.AlipayWithdrawCashDao">
+    <resultMap id="alipayWithdrawCashMap" type="com.cndinuo.domain.AlipayWithdrawCash">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="outBizNo" column="out_biz_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payeeType" column="payee_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payeeAccount" column="payee_account" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="amount" column="amount" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payerShowName" column="payer_show_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payeeRealName" column="payee_real_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="orderId" column="order_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payDate" column="pay_date" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mber_id,
+		out_biz_no,
+		payee_type,
+		payee_account,
+		amount,
+		payer_show_name,
+		payee_real_name,
+		create_time,
+		remark,
+		order_id,
+		pay_date
+	</sql>
+
+	<select id="getLastId" resultType="java.lang.Integer">
+		select id from alipay_withdraw_cash order by id desc limit 1
+	</select>
+
+    <select id="getById" resultMap="alipayWithdrawCashMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from alipay_withdraw_cash  alipayWithdrawCash
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="alipayWithdrawCashMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from alipay_withdraw_cash  alipayWithdrawCash
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="alipayWithdrawCashMap" parameterType="com.cndinuo.domain.AlipayWithdrawCash">
+		select <include refid="cols"/> from alipay_withdraw_cash  alipayWithdrawCash
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="alipayWithdrawCashMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from alipay_withdraw_cash  alipayWithdrawCash
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from alipay_withdraw_cash  alipayWithdrawCash
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from alipay_withdraw_cash  alipayWithdrawCash
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from alipay_withdraw_cash  alipayWithdrawCash
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.AlipayWithdrawCash" useGeneratedKeys="true" keyProperty="id">
+		insert into alipay_withdraw_cash
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				out_biz_no,
+			</if>
+			<if test=" payeeType != null and payeeType != ''">
+				payee_type,
+			</if>
+			<if test=" payeeAccount != null and payeeAccount != ''">
+				payee_account,
+			</if>
+			<if test=" amount != null and amount != ''">
+				amount,
+			</if>
+			<if test=" payerShowName != null and payerShowName != ''">
+				payer_show_name,
+			</if>
+			<if test=" payeeRealName != null and payeeRealName != ''">
+				payee_real_name,
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time,
+			</if>
+			<if test=" remark != null and remark != ''">
+				remark,
+			</if>
+			<if test=" orderId != null and orderId != ''">
+				order_id,
+			</if>
+			<if test=" payDate != null and payDate != ''">
+				pay_date
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				#{outBizNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeType != null and payeeType != ''">
+				#{payeeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeAccount != null and payeeAccount != ''">
+				#{payeeAccount,jdbcType=VARCHAR},
+			</if>
+			<if test=" amount != null and amount != ''">
+				#{amount,jdbcType=VARCHAR},
+			</if>
+			<if test=" payerShowName != null and payerShowName != ''">
+				#{payerShowName,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeRealName != null and payeeRealName != ''">
+				#{payeeRealName,jdbcType=VARCHAR},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" remark != null and remark != ''">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderId != null and orderId != ''">
+				#{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test=" payDate != null and payDate != ''">
+				#{payDate,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.AlipayWithdrawCash">
+		update alipay_withdraw_cash alipayWithdrawCash
+		<set>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				out_biz_no = #{outBizNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeType != null and payeeType != ''">
+				payee_type = #{payeeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeAccount != null and payeeAccount != ''">
+				payee_account = #{payeeAccount,jdbcType=VARCHAR},
+			</if>
+			<if test=" amount != null and amount != ''">
+				amount = #{amount,jdbcType=VARCHAR},
+			</if>
+			<if test=" payerShowName != null and payerShowName != ''">
+				payer_show_name = #{payerShowName,jdbcType=VARCHAR},
+			</if>
+			<if test=" payeeRealName != null and payeeRealName != ''">
+				payee_real_name = #{payeeRealName,jdbcType=VARCHAR},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" remark != null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderId != null and orderId != ''">
+				order_id = #{orderId,jdbcType=VARCHAR},
+			</if>
+			<if test=" payDate != null and payDate != ''">
+				pay_date = #{payDate,jdbcType=VARCHAR}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update alipay_withdraw_cash  alipayWithdrawCash set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update alipay_withdraw_cash alipayWithdrawCash set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update alipay_withdraw_cash alipayWithdrawCash set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.AlipayWithdrawCash">
+		update alipay_withdraw_cash alipayWithdrawCash set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.OrderDao">
+    <resultMap id="orderMap" type="com.cndinuo.domain.Order">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="orderNo" column="order_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="orderType" column="order_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtName" column="mrht_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="orderStatus" column="order_status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="deliveryType" column="delivery_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="deliveryFee" column="delivery_fee" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="salesPrice" column="sales_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="totalPrice" column="total_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="orderTime" column="order_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="payType" column="pay_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="payTime" column="pay_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="deliveryTime" column="delivery_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="receiptName" column="receipt_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="receiptMobile" column="receipt_mobile" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="receiptAddr" column="receipt_addr" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="version" column="version" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="settleStatus" column="settle_status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		order_no,
+		order_type,
+		mber_id,
+		mrht_id,
+		mrht_name,
+		order_status,
+		delivery_type,
+		delivery_fee,
+		sales_price,
+		total_price,
+		order_time,
+		pay_type,
+		pay_time,
+		delivery_time,
+		receipt_name,
+		receipt_mobile,
+		receipt_addr,
+		remark,
+		version,
+		settle_status
+	</sql>
+
+	<!--查询骑手当前未完成订单的数量-->
+	<select id="getRiderOrderCountByMberId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select COUNT(1) FROM `order` WHERE mber_id = #{mberId} AND order_status BETWEEN 2 AND 4
+	</select>
+
+	<!--骑手接单列表-->
+	<select id="getRiderRobByPage" parameterType="com.cndinuo.page.Page" resultMap="orderMap">
+		SELECT
+			o.order_no,
+			o.mrht_name,
+			mi.mobile,
+			o.delivery_type,
+			o.delivery_time,
+			compute_distance (rp.lng,rp.lat,mi.lng,mi.lat) AS distance
+		FROM
+			`order` o,
+			merchant m,
+			mrht_info mi,
+			mber_rider_position rp
+		WHERE
+			o.mrht_id = m.id
+			AND m.id = mi.mrht_id
+			AND m.mrht_type = 2
+			AND o.delivery_type = 2
+			AND o.order_status = 2
+			AND compute_distance (rp.lng,rp.lat,mi.lng,mi.lat)/1000 &lt; (select `value` from sys_setting where `key` = 'rider_distance_limit' and deleted = 0)
+	</select>
+	<!--商家接单页面-->
+	<select id="getMrhtOrderView" parameterType="java.util.Map" resultMap="orderMap">
+		SELECT
+			mi.mobile ,
+			CONCAT((select `value` from sys_setting where `key` ='img_server' and deleted = 0),'/',mi.store_image) as storeImage,
+			o.mrht_id ,
+			o.mrht_name,
+			o.delivery_fee,
+			o.total_price,
+			o.delivery_time,
+			o.receipt_addr,
+			o.order_no,
+			o.order_time,
+			o.order_status,
+			o.pay_type
+		FROM
+			`order` o,
+			mrht_info mi
+		WHERE
+			o.order_no = #{orderNo}
+			and o.mrht_id = mi.mrht_id
+
+	</select>
+
+	<select id="getOrderByOrderNo" parameterType="java.lang.String" resultMap="orderMap">
+		select <include refid="cols" /> from `order` where order_no = #{orderNo}
+	</select>
+
+    <select id="getById" resultMap="orderMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from order  order
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="orderMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from `order`
+		<where>
+			<if test="orderNo != null and orderNo !='' ">
+				and order_no = #{orderNo}
+			</if>
+			<if test="mberId != null">
+				and mber_id = #{mberId}
+			</if>
+			<if test="mrhtId != null">
+				and mrht_id = #{mrhtId}
+			</if>
+			<if test="orderStatus != null">
+				and order_status = #{orderStatus}
+			</if>
+			<if test="settleCycle != null">
+				and TO_DAYS(NOW()) - TO_DAYS(order_time) >= #{settleCycle}
+			</if>
+			<if test="settleStatus != null">
+				and settle_status = #{settleStatus}
+			</if>
+			<if test="orderType != null">
+				and order_type = #{orderType}
+			</if>
+		</where>
+		order by id asc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="orderMap" parameterType="com.cndinuo.domain.Order">
+		select <include refid="cols"/> from order  order
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="orderMap" parameterType="com.cndinuo.page.Page">
+		SELECT
+			o.id,
+			o.order_no,
+			o.pay_type AS payType,
+			o.pay_time AS payTime,
+			o.order_status AS orderStatus,
+			o.order_no AS orderNo,
+			o.order_time as orderTime,
+			o.delivery_fee as deliveryFee,
+			o.delivery_type as deliveryType,
+			o.sales_price as salesPrice,
+			o.total_price AS totalPrice
+		FROM `order` o
+		<where>
+			<if test="p != null and p.orderNo != null and p.orderNo != ''" >
+				and o.order_no = #{p.orderNo}
+			</if>
+			<if test="p != null and p.mrhtId != null and p.mrhtId != ''" >
+				and o.mrht_id = #{p.mrhtId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+	<select id="getCommView" parameterType="java.util.Map" resultMap="orderMap">
+		SELECT
+		<include refid="cols" />
+		FROM
+		`order`
+		WHERE
+		order_no = #{orderNo}
+		and mber_id = #{mberId}
+	</select>
+
+	<select id="getMrhtByLatelyOrder" parameterType="com.cndinuo.page.Page" resultMap="orderMap">
+		SELECT
+			receipt_name,
+			receipt_mobile,
+			order_no,
+			order_status
+		FROM
+			`order`
+		WHERE
+			DATE_SUB(CURDATE(), INTERVAL 3 DAY) &lt;= DATE(order_time)
+			AND mrht_id = #{p.mrhtId}
+			AND order_status = #{p.orderStatus}
+			ORDER BY order_time DESC
+	</select>
+
+	<select id="getMrhtOrderAll" parameterType="com.cndinuo.page.Page" resultMap="orderMap">
+		SELECT
+			receipt_name,
+			receipt_mobile,
+			order_no,
+			order_status
+		FROM
+			`order`
+		<where>
+			<if test="p.orderStatus != null and p.orderStatus != ''">
+				and order_status = #{p.orderStatus}
+			</if>
+			<if test="p.mrhtId != null and p.mrhtId != ''">
+				and mrht_id = #{p.mrhtId}
+			</if>
+			<if test="p.orderTime != null and p.orderTime != ''">
+				and order_time like CONCAT('%',#{p.orderTime},'%')
+			</if>
+		</where>
+			ORDER BY
+			order_time DESC
+	</select>
+
+	<select id="getOrderByPage" parameterType="com.cndinuo.page.Page" resultMap="orderMap">
+		SELECT
+			o.order_no,
+			o.delivery_fee,
+			o.delivery_time,
+			o.delivery_type,
+			m.mrht_name,
+			o.order_status,
+			o.order_time,
+			o.order_type,
+			o.pay_time,
+			o.pay_type,
+			o.receipt_addr,
+			o.receipt_mobile,
+			o.receipt_name,
+			o.sales_price,
+			o.total_price,
+			mb.nick_name
+		FROM
+			mber_info mb,
+			merchant m,
+			`order` o
+		WHERE
+			m.id = o.mrht_id
+			and mb.mber_id = o.mber_id
+			and o.order_type = 1
+			<if test="p.mrhtName != null and p.mrhtName != ''">
+				and m.mrht_name like CONCAT('%',#{p.mrhtName},'%')
+			</if>
+			<if test="p.orderNo != null and p.orderNo != ''">
+				and o.order_no = #{p.orderNo}
+			</if>
+		order by o.order_time desc
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from order  order
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from order  order
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from order  order
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+	<select id="getOrdersByMberId" resultMap="orderMap" parameterType="com.cndinuo.page.Page">
+		SELECT
+			o.order_no,
+			o.mrht_id,
+			o.mrht_name,
+			o.order_status,
+			o.total_price,
+			o.order_time
+		FROM
+			`order` o
+		WHERE
+			o.mber_id = #{p.mberId}
+		ORDER BY o.order_time DESC
+	</select>
+
+	<select id="getOrderByMrhtId" resultMap="orderMap" parameterType="java.util.Map">
+		SELECT
+			o.order_no,
+			o.receipt_name,
+			o.receipt_mobile
+		FROM
+		`order` o
+		WHERE
+			o.mrht_id = #{mrhtId}
+		AND o.order_status = #{orderStatus}
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.Order" useGeneratedKeys="true" keyProperty="id">
+		insert into order
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				order_no,
+			</if>
+			<if test=" orderType != null and orderType != ''">
+				order_type,
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				mrht_name,
+			</if>
+			<if test=" orderStatus != null and orderStatus != ''">
+				order_status,
+			</if>
+			<if test=" deliveryType != null and deliveryType != ''">
+				delivery_type,
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee,
+			</if>
+			<if test=" salesPrice != null and salesPrice != ''">
+				sales_price,
+			</if>
+			<if test=" totalPrice != null and totalPrice != ''">
+				total_price,
+			</if>
+			<if test=" orderTime != null and orderTime != ''">
+				order_time,
+			</if>
+			<if test=" payType != null and payType != ''">
+				pay_type,
+			</if>
+			<if test=" payTime != null and payTime != ''">
+				pay_time,
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				delivery_time,
+			</if>
+			<if test=" receiptName != null and receiptName != ''">
+				receipt_name,
+			</if>
+			<if test=" receiptMobile != null and receiptMobile != ''">
+				receipt_mobile,
+			</if>
+			<if test=" receiptAddr != null and receiptAddr != ''">
+				receipt_addr,
+			</if>
+			<if test=" remark != null and remark != ''">
+				remark
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderType != null and orderType != ''">
+				#{orderType,jdbcType=TINYINT},
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				#{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderStatus != null and orderStatus != ''">
+				#{orderStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" deliveryType != null and deliveryType != ''">
+				#{deliveryType,jdbcType=TINYINT},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				#{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" salesPrice != null and salesPrice != ''">
+				#{salesPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" totalPrice != null and totalPrice != ''">
+				#{totalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" orderTime != null and orderTime != ''">
+				#{orderTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" payType != null and payType != ''">
+				#{payType,jdbcType=TINYINT},
+			</if>
+			<if test=" payTime != null and payTime != ''">
+				#{payTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				#{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" receiptName != null and receiptName != ''">
+				#{receiptName,jdbcType=VARCHAR},
+			</if>
+			<if test=" receiptMobile != null and receiptMobile != ''">
+				#{receiptMobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" receiptAddr != null and receiptAddr != ''">
+				#{receiptAddr,jdbcType=VARCHAR},
+			</if>
+			<if test=" remark != null and remark != ''">
+				#{remark,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.Order">
+		update order order
+		<set>
+			<if test=" orderNo != null and orderNo != ''">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderType != null and orderType != ''">
+				orderType = #{orderType,jdbcType=TINYINT},
+			</if>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtName != null and mrhtName != ''">
+				mrht_name = #{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test=" orderStatus != null and orderStatus != ''">
+				order_status = #{orderStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" deliveryType != null and deliveryType != ''">
+				delivery_type = #{deliveryType,jdbcType=TINYINT},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee = #{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" salesPrice != null and salesPrice != ''">
+				sales_price = #{salesPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" totalPrice != null and totalPrice != ''">
+				total_price = #{totalPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" orderTime != null and orderTime != ''">
+				order_time = #{orderTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" payType != null and payType != ''">
+				pay_type = #{payType,jdbcType=TINYINT},
+			</if>
+			<if test=" payTime != null and payTime != ''">
+				pay_time = #{payTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				delivery_time = #{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" receiptName != null and receiptName != ''">
+				receipt_name = #{receiptName,jdbcType=VARCHAR},
+			</if>
+			<if test=" receiptMobile != null and receiptMobile != ''">
+				receipt_mobile = #{receiptMobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" receiptAddr != null and receiptAddr != ''">
+				receipt_addr = #{receiptAddr,jdbcType=VARCHAR},
+			</if>
+			<if test=" remark != null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" version != null">
+				version = version + 1
+			</if>
+		</set>
+		 where id= #{id} and version = #{version}
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update `order`  o set
+		<if test="orderStatus != null">
+			order_status = #{orderStatus}
+		</if>
+		where
+		order_no = #{orderNo}
+		<!-- 添加查询条件属性 -->
+	</update>
+
+	<update id="updateByStatus" parameterType="java.util.Map">
+		update `order` o
+		<set>
+			<if test="orderStatus != null">
+				o.order_status = #{orderStatus},
+			</if>
+			<if test="deliveryType != null">
+				o.delivery_type = #{deliveryType},
+			</if>
+			<if test="settleStatus != null">
+				o.settle_status = #{settleStatus},
+			</if>
+			<if test="remark != null and remark != ''" >
+				o.remark = #{remark},
+			</if>
+			o.version = version + 1
+		</set>
+		where
+			o.order_no = #{orderNo}
+			and version = #{version}
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update order order set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update order order set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.Order">
+		update order order set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

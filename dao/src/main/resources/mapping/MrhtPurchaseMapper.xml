@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtPurchaseDao">
+    <resultMap id="mrhtPurchaseMap" type="com.cndinuo.domain.MrhtPurchase">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="goodsName" column="goods_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="goodsSpec" column="goods_spec" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="goodsType" column="goods_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="num" column="num" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="originalPrice" column="original_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="isReturn" column="is_return" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="supplierId" column="supplier_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="supplierName" column="supplier_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payType" column="pay_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="totalPrice" column="total_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="barCode" column="bar_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mrht_id,
+		goods_name,
+		goods_spec,
+		goods_type,
+		num,
+		original_price,
+		is_return,
+		status,
+		supplier_id,
+		supplier_name,
+		pay_type,
+		total_price,
+		bar_code
+	</sql>
+    <select id="getById" resultMap="mrhtPurchaseMap" parameterType="java.lang.Integer">
+		select
+			id,
+			mrht_id,
+			goods_name,
+			goods_spec,
+		    (select group_concat(name) from mrht_goods_class c where find_in_set(c.code,m.goods_type)) as typeName,
+			goods_type,
+			num,
+			original_price,
+			(
+				SELECT
+				GROUP_CONCAT(name) from sys_dict d
+				WHERE
+				d.`table` = 'mrht_goods'
+				AND d.`field` = 'is_return'
+				AND find_in_set(d.value,m.is_return)
+			) as returnName,
+			is_return,
+			status,
+			supplier_id,
+			supplier_name,
+			pay_type,
+			total_price,
+			bar_code,
+			(SELECT mt.mrht_name FROM merchant mt WHERE m.mrht_id = mt.id) AS mrhtName
+			from mrht_purchase  m
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mrhtPurchaseMap" parameterType="java.util.Map">
+		select
+			mp.id,
+			mp.mrht_id,
+			mp.goods_name,
+			mp.goods_spec,
+				(select group_concat(name) from mrht_goods_class c where find_in_set(c.code,mp.goods_type)) as typeName,
+			mp.goods_type,
+			mp.num,
+			mp.original_price,
+			(
+				SELECT
+				GROUP_CONCAT(name) from sys_dict d
+				WHERE
+				d.`table` = 'mrht_goods'
+				AND d.`field` = 'is_return'
+				AND find_in_set(d.value,mp.is_return)
+			) as returnName,
+			mp.is_return,
+			mp.status,
+			mp.supplier_id,
+			mp.supplier_name,
+			mp.pay_type,
+			mp.bar_code,
+			mp.total_price,
+			m.mrht_name as mrhtName
+		from mrht_purchase  mp,merchant m
+		<where>
+			<if test="mrhtId != null and mrhtId != ''" >
+				and mp.mrht_id = #{mrhtId}
+			</if>
+			<if test="status != null and status == 3" >
+				and mp.status between 3 and 5
+			</if>
+			<if test="supplierId != null and supplierId != ''">
+				and mp.supplier_id = #{supplierId}
+			</if>
+			and mp.mrht_id = m.id
+		</where>
+		order by mp.id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mrhtPurchaseMap" parameterType="com.cndinuo.domain.MrhtPurchase">
+		select <include refid="cols"/> from mrht_purchase  MrhtPurchase
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mrhtPurchaseMap" parameterType="com.cndinuo.page.Page">
+		select
+			id,
+			mrht_id,
+			goods_name,
+			goods_spec,
+		    (select group_concat(name) from mrht_goods_class c where find_in_set(c.code,mp.goods_type)) as typeName,
+			goods_type,
+			num,
+			original_price,
+			(
+				SELECT
+				GROUP_CONCAT(name) from sys_dict d
+				WHERE
+				d.`table` = 'mrht_goods'
+				AND d.`field` = 'is_return'
+				AND find_in_set(d.value,mp.is_return)
+			) as returnName,
+			is_return,
+			status,
+			supplier_id,
+			supplier_name,
+			pay_type,
+			total_price,
+			bar_code,
+			(SELECT m.mrht_name FROM merchant m WHERE mp.mrht_id = m.id) AS mrhtName
+		from mrht_purchase  mp
+		<where>
+			<if test="p != null and p.goodsName != null and p.goodsName != ''" >
+				and goods_name like CONCAT('%',#{p.goodsName},'%')
+			</if>
+			<if test="p != null and p.status == 1" >
+				and status between 1 and 2
+			</if>
+			<if test="p != null and p.status == 7">
+				and status between 3 and 7
+			</if>
+			<if test="p != null and p.supplierId != null and p.supplierId != ''">
+				and supplier_id = #{p.supplierId}
+			</if>
+			<if test="p != null and p.mrhtId != null">
+				and mrht_id = #{p.mrhtId}
+			</if>
+		</where>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase  MrhtPurchase
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase  MrhtPurchase
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase  MrhtPurchase
+		<!--添加if语句添加过滤条件-->
+	</select>
+	<update id="updateById" parameterType="com.cndinuo.domain.MrhtPurchase">
+		update mrht_purchase MrhtPurchase set
+		<if test="mrhtId != null">
+			mrht_id = #{mrhtId,jdbcType=INTEGER},
+		</if>
+		<if test="goodsName != null and goodsName != ''">
+			goods_name = #{goodsName,jdbcType=VARCHAR}
+		</if>
+		<if test="goodsSpec != null and goodsSpec != ''">
+			,goods_spec = #{goodsSpec,jdbcType=VARCHAR}
+		</if>
+		<if test="goodsType != null and goodsType != ''">
+			,goods_type = #{goodsType,jdbcType=VARCHAR}
+		</if>
+		<if test="num != null">
+			,num = #{num,jdbcType=INTEGER}
+		</if>
+		<if test="originalPrice != null and originalPrice != ''">
+			,original_price = #{originalPrice,jdbcType=DECIMAL}
+		</if>
+		<if test="isReturn != null and isReturn != ''">
+			,is_return = #{isReturn,jdbcType=VARCHAR}
+		</if>
+		<if test="status != null">
+			,status = #{status,jdbcType=TINYINT}
+		</if>
+		<if test="supplierId !=null">
+			,supplier_id = #{supplierId,jdbcType=INTEGER}
+		</if>
+		<if test="supplierName != null and supplierName != ''">
+			,supplier_name = #{supplierName,jdbcType=VARCHAR}
+		</if>
+		<if test="payType != null and payType !=''">
+			,pay_type = #{payType,jdbcType=TINYINT}
+		</if>
+		<if test="totalPrice != null and totalPrice != ''">
+			,total_price = #{totalPrice,jdbcType=DECIMAL}
+		</if>
+		<if test="barCode !=null and barCode != ''">
+			,bar_code = #{barCode,jdbcType=VARCHAR}
+		</if>
+		where id= #{id}
+	</update>
+	<insert id="insert" parameterType="com.cndinuo.domain.MrhtPurchase" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_purchase (
+			mrht_id,
+			goods_name,
+			goods_spec,
+			goods_type,
+			num,
+			original_price,
+			is_return,
+			status,
+			supplier_id,
+			supplier_name,
+			pay_type,
+			total_price,
+			bar_code)
+		value (
+			#{mrhtId,jdbcType=INTEGER},
+			#{goodsName,jdbcType=VARCHAR},
+			#{goodsSpec,jdbcType=VARCHAR},
+			#{goodsType,jdbcType=VARCHAR},
+			#{num,jdbcType=INTEGER},
+			#{originalPrice,jdbcType=DECIMAL},
+			#{isReturn,jdbcType=VARCHAR},
+			#{status,jdbcType=TINYINT},
+			#{supplierId,jdbcType=INTEGER},
+			#{supplierName,jdbcType=VARCHAR},
+			#{payType,jdbcType=TINYINT},
+			#{totalPrice,jdbcType=DECIMAL},
+			#{barCode,jdbcType=VARCHAR}
+		)
+	</insert>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update mrht_purchase  MrhtPurchase set
+		<if test="status != null">
+			status = #{status}
+		</if>
+		<if test="originalPrice != null and originalPrice != ''">
+			,original_price = #{originalPrice}
+		</if>
+		<if test="isReturn != null and isReturn != ''">
+			,is_return = #{isReturn}
+		</if>
+		<if test="supplierId != null">
+			,supplier_id = #{supplierId}
+		</if>
+		<if test="supplierName != null and supplierName != ''">
+			,supplier_name = #{supplierName}
+		</if>
+		<if test="payType != null and payType != ''">
+			,pay_type = #{payType}
+		</if>
+		<if test="totalPrice != null and totalPrice != ''">
+			,total_price = #{totalPrice}
+		</if>
+		<where>
+			and id = #{id}
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_purchase MrhtPurchase set status = 6
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_purchase MrhtPurchase set deleted = 1
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtPurchase">
+		update mrht_purchase MrhtPurchase set deleted=1
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SysDictDao">
+    <resultMap id="sysDictMap" type="com.cndinuo.domain.SysDict">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="table" column="table" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="field" column="field" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="type" column="type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="value" column="value" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sort" column="sort" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		`table`,
+		`field`,
+		type,
+		name,
+		value,
+		sort,
+		status
+	</sql>
+    <select id="getById" resultMap="sysDictMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sys_dict  sysDict
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="sysDictMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from sys_dict  sysDict
+		<where>
+			<if test="tableName != null and tableName != ''" >
+				and `table` = #{tableName}
+			</if>
+			<if test="fieldName != null and fieldName != ''" >
+				and `field` = #{fieldName}
+			</if>
+		</where>
+		order by sort,value asc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="sysDictMap" parameterType="com.cndinuo.domain.SysDict">
+		select <include refid="cols"/> from sys_dict  sysDict
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="sysDictMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from sys_dict sysDict
+		<where>
+			<if test="p != null and p.field != null and p.field != ''" >
+				and field like CONCAT('%',#{p.field},'%')
+			</if>
+			<if test="p != null and p.table != null and p.table != ''" >
+				and `table` like CONCAT('%',#{p.table},'%')
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sys_dict  sysDict
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from sys_dict  sysDict
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sys_dict  sysDict
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.SysDict" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_dict (
+			`table`,
+			field,
+			type,
+			name,
+			value,
+			sort,
+			status) 
+		value (
+			#{table,jdbcType=VARCHAR},
+			#{field,jdbcType=VARCHAR},
+			#{type,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			#{value,jdbcType=VARCHAR},
+			#{sort,jdbcType=INTEGER},
+			#{status,jdbcType=TINYINT}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.SysDict">
+		update sys_dict sysDict set
+			`table` = #{table,jdbcType=VARCHAR},
+			field = #{field,jdbcType=VARCHAR},
+			type = #{type,jdbcType=VARCHAR},
+			name = #{name,jdbcType=VARCHAR},
+			value = #{value,jdbcType=VARCHAR},
+			sort = #{sort,jdbcType=INTEGER},
+			status = #{status,jdbcType=TINYINT}
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update sys_dict  sysDict set
+		<if test="status != null">
+			status = #{status}
+		</if>
+		<where>
+			id in (${id})
+		</where>
+ 		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sys_dict sysDict set deleted=1
+		where id=#{id}
+	</update>
+    <delete id="deleteByMap" parameterType="java.util.Map">
+		delete from sys_dict
+		<where>
+			<if test="ids != null and ids != ''" >
+				and id in (${ids})
+			</if>
+		</where>
+		<!-- 添加条件属性 -->
+	</delete>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SysDict">
+		update sys_dict sysDict set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

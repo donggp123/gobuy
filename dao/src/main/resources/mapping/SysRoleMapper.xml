@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SysRoleDao">
+    <resultMap id="sysRoleMap" type="com.cndinuo.domain.SysRole">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="roleName" column="role_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="content" column="content" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="updateBy" column="update_by" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="deleted" column="deleted" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		role_name,
+		content,
+		create_time,
+		update_time,
+		create_by,
+		update_by,
+		deleted
+	</sql>
+
+    <select id="getById" resultMap="sysRoleMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sys_role  sysRole
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="sysRoleMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from sys_role  sysRole
+		<where>
+			and deleted = 0
+			<if test="roleIds != null and roleIds != ''" >
+				and id in (${roleIds})
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="sysRoleMap" parameterType="com.cndinuo.domain.SysRole">
+		select <include refid="cols"/> from sys_role  sysRole
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="sysRoleMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from sys_role  sysRole
+		<where>
+			and deleted = 0
+			<if test="p != null and p.roleName != null and p.roleName != ''" >
+				and role_name like CONCAT('%',#{p.roleName},'%')
+			</if>
+		</where>
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sys_role  sysRole
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from sys_role  sysRole
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sys_role  sysRole
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.SysRole" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_role (
+			role_name,
+			content,
+			create_time,
+			create_by,
+			deleted) 
+		value (
+			#{roleName,jdbcType=VARCHAR},
+			#{content,jdbcType=VARCHAR},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{createBy,jdbcType=INTEGER},
+			#{deleted,jdbcType=TINYINT}
+		)
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.SysRole">
+		update sys_role sysRole set 
+			role_name = #{roleName,jdbcType=VARCHAR},
+			content = #{content,jdbcType=VARCHAR},
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+			update_by = #{updateBy,jdbcType=INTEGER}
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update sys_role  sysRole set
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sys_role sysRole set deleted=1 where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update sys_role sysRole set deleted=1
+		<where>
+			<if test="ids != null and ids != ''" >
+				and id in (${ids})
+			</if>
+		</where>
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SysRole">
+		update sys_role sysRole set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

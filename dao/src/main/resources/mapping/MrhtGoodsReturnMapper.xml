@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtGoodsReturnDao">
+    <resultMap id="mrhtGoodsReturnMap" type="com.cndinuo.domain.MrhtGoodsReturn">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="goodsName" column="goods_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="goodsSpec" column="goods_spec" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="goodsType" column="goods_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="retNum" column="ret_num" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="retPrice" column="ret_price" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="retReason" column="ret_reason" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="retTime" column="ret_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="retStatus" column="ret_status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="supplierId" column="supplier_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="supplierName" column="supplier_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="barCode" column="bar_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		mrht_id,
+		goods_name,
+		goods_spec,
+		goods_type,
+		ret_num,
+		ret_price,
+		ret_reason,
+		ret_time,
+		ret_status,
+		remark,
+		supplier_id,
+		supplier_name,
+		bar_code
+	</sql>
+
+    <select id="getById" resultMap="mrhtGoodsReturnMap" parameterType="java.lang.Integer">
+		select
+			id,
+			mrht_id,
+			(select mrht_name from merchant m where mt.mrht_id = m.id limit 1) as mrhtName,
+			goods_name,
+			goods_spec,
+			(select group_concat(name) from mrht_goods_class c where find_in_set(c.code,mt.goods_type)) as typeName,
+			goods_type,
+			ret_num,
+			ret_price,
+			(select group_concat(name) from sys_dict d where d.`table` = 'mrht_goods' AND d.field = 'is_return' and find_in_set(d.value,mt.ret_reason)) as reasonName,
+			ret_reason,
+			ret_time,
+			ret_status,
+			remark,
+			supplier_id,
+			supplier_name,
+			bar_code
+		 from mrht_goods_return  mt
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="mrhtGoodsReturnMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_goods_return  mrhtGoodsReturn
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="mrhtGoodsReturnMap" parameterType="com.cndinuo.domain.MrhtGoodsReturn">
+		select <include refid="cols"/> from mrht_goods_return  mrhtGoodsReturn
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="mrhtGoodsReturnMap" parameterType="com.cndinuo.page.Page">
+		select
+			id,
+			mrht_id,
+			(select mrht_name from merchant m where mt.mrht_id = m.id limit 1) as mrhtName,
+			goods_name,
+			goods_spec,
+			(select group_concat(name) from mrht_goods_class c where find_in_set(c.code,mt.goods_type)) as typeName,
+			goods_type,
+			ret_num,
+			ret_price,
+			(select group_concat(name) from sys_dict d where d.`table` = 'mrht_goods' AND d.field = 'is_return' and find_in_set(d.value,mt.ret_reason)) as reasonName,
+			ret_reason,
+			ret_time,
+			ret_status,
+			remark,
+			supplier_id,
+			supplier_name,
+			bar_code
+		from mrht_goods_return  mt
+		<where>
+			<if test="p != null and p.mrhtId != null " >
+				and mrht_id = #{p.mrhtId}
+			</if>
+			<if test="p != null and p.supplierId != null " >
+				and supplier_id = #{p.supplierId}
+			</if>
+		</where>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_return  mrhtGoodsReturn
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_return  mrhtGoodsReturn
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_return  mrhtGoodsReturn
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtGoodsReturn" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_goods_return (
+			<if test=" mrhtId!= null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" goodsName!= null and goodsName != ''">
+				goods_name,
+			</if>
+			<if test=" goodsSpec!= null and goodsSpec != ''">
+				goods_spec,
+			</if>
+			<if test=" goodsType!= null and goodsType != ''">
+				goods_type,
+			</if>
+			<if test=" retNum!= null and retNum != ''">
+				ret_num,
+			</if>
+			<if test=" retPrice!= null and retPrice != ''">
+				ret_price,
+			</if>
+			<if test=" retReason!= null and retReason != ''">
+				ret_reason,
+			</if>
+			<if test=" retTime!= null and retTime != ''">
+				ret_time,
+			</if>
+			<if test=" retStatus!= null and retStatus != ''">
+				ret_status,
+			</if>
+			<if test=" remark!= null and remark != ''">
+				remark,
+			</if>
+			<if test=" supplierId!= null and supplierId != ''">
+				supplier_id,
+			</if>
+			<if test=" supplierName!= null and supplierName != ''">
+				supplier_name,
+			</if>
+			<if test=" barCode!= null and barCode != ''">
+				bar_code
+			</if>) 
+		value (
+			<if test=" mrhtId!= null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" goodsName!= null and goodsName != ''">
+				#{goodsName,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsSpec!= null and goodsSpec != ''">
+				#{goodsSpec,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsType!= null and goodsType != ''">
+				#{goodsType,jdbcType=VARCHAR},
+			</if>
+			<if test=" retNum!= null and retNum != ''">
+				#{retNum,jdbcType=INTEGER},
+			</if>
+			<if test=" retPrice!= null and retPrice != ''">
+				#{retPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" retReason!= null and retReason != ''">
+				#{retReason,jdbcType=VARCHAR},
+			</if>
+			<if test=" retTime!= null and retTime != ''">
+				#{retTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" retStatus!= null and retStatus != ''">
+				#{retStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" remark!= null and remark != ''">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" supplierId!= null and supplierId != ''">
+				#{supplierId,jdbcType=INTEGER},
+			</if>
+			<if test=" supplierName!= null and supplierName != ''">
+				#{supplierName,jdbcType=VARCHAR},
+			</if>
+			<if test=" barCode!= null and barCode != ''">
+				#{barCode,jdbcType=VARCHAR}
+			</if>
+		)
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtGoodsReturn">
+		update mrht_goods_return mrhtGoodsReturn set
+			<if test=" mrhtId!= null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" goodsName!= null and goodsName != ''">
+				goods_name = #{goodsName,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsSpec!= null and goodsSpec != ''">
+				goods_spec = #{goodsSpec,jdbcType=VARCHAR},
+			</if>
+			<if test=" goodsType!= null and goodsType != ''">
+				goods_type = #{goodsType,jdbcType=VARCHAR},
+			</if>
+			<if test=" retNum!= null and retNum != ''">
+				ret_num = #{retNum,jdbcType=INTEGER},
+			</if>
+			<if test=" retPrice!= null and retPrice != ''">
+				ret_price = #{retPrice,jdbcType=DECIMAL},
+			</if>
+			<if test=" retReason!= null and retReason != ''">
+				ret_reason = #{retReason,jdbcType=VARCHAR},
+			</if>
+			<if test=" retTime!= null and retTime != ''">
+				ret_time = #{retTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" retStatus!= null and retStatus != ''">
+				ret_status = #{retStatus,jdbcType=TINYINT},
+			</if>
+			<if test=" remark!= null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" supplierId!= null and supplierId != ''">
+				supplier_id = #{supplierId,jdbcType=INTEGER},
+			</if>
+			<if test=" supplierName!= null and supplierName != ''">
+				supplier_name = #{supplierName,jdbcType=VARCHAR},
+			</if>
+			<if test=" barCode!= null and barCode != ''">
+				bar_code = #{barCode,jdbcType=VARCHAR}
+			</if>
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update mrht_goods_return  mrhtGoodsReturn set
+		<if test="retStatus != null " >
+			ret_status = #{retStatus}
+		</if>
+		<if test="remark != null " >
+			,remark = #{remark}
+		</if>
+		<where>
+			<if test="id != null">
+				id = #{id}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_goods_return mrhtGoodsReturn set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_goods_return mrhtGoodsReturn set deleted=1
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtGoodsReturn">
+		update mrht_goods_return mrhtGoodsReturn set deleted=1
+		where id=#{id}
+	</update>
+
+</mapper>

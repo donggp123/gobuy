@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtGoodsClassDao">
+    <resultMap id="mrhtGoodsClassMap" type="com.cndinuo.domain.MrhtGoodsClass">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="code" column="code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="parCode" column="par_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="grade" column="grade" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		code,
+		par_code,
+		name,
+		remark,
+		grade
+	</sql>
+    <select id="getById" resultMap="mrhtGoodsClassMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mrht_goods_class  MrhtGoodsClass
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mrhtGoodsClassMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_goods_class  MrhtGoodsClass
+		<where>
+			<if test=" parCode != null" >
+				and par_code = #{parCode}
+			</if>
+			<if test=" code != null and code != ''" >
+				and code in (${code})
+			</if>
+		</where>
+		order by code desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mrhtGoodsClassMap" parameterType="com.cndinuo.domain.MrhtGoodsClass">
+		select <include refid="cols"/> from mrht_goods_class  MrhtGoodsClass
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mrhtGoodsClassMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mrht_goods_class  MrhtGoodsClass
+		<where>
+			<if test="p != null and p.name != null and p.name != ''" >
+				and name like CONCAT('%',#{p.name},'%')
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_class  MrhtGoodsClass
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_class  MrhtGoodsClass
+		<where>
+			<if test="parCode != null and parCode != ''" >
+				and par_code = #{parCode}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_goods_class  MrhtGoodsClass
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtGoodsClass" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_goods_class (
+			<if test=" code!= null and code != ''">
+				code,
+			</if>
+			<if test=" parCode!= null and parCode != ''">
+				par_code,
+			</if>
+			<if test=" name!= null and name != ''">
+				name,
+			</if>
+			<if test=" remark!= null and remark != ''">
+				remark,
+			</if>
+			<if test=" grade!= null and grade != ''">
+				grade
+			</if>) 
+		value (
+			<if test=" code!= null and code != ''">
+				#{code,jdbcType=VARCHAR},
+			</if>
+			<if test=" parCode!= null and parCode != ''">
+				#{parCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" name!= null and name != ''">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test=" remark!= null and remark != ''">
+				#{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" grade != null and grade != ''">
+				#{grade,jdbcType=TINYINT}
+			</if>
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtGoodsClass">
+		update mrht_goods_class MrhtGoodsClass set
+			<if test=" code!= null and code != ''">
+				code = #{code,jdbcType=VARCHAR},
+			</if>
+			<if test=" parCode!= null and parCode != ''">
+				par_code = #{parCode,jdbcType=VARCHAR},
+			</if>
+
+			<if test=" remark!= null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test=" grade!= null and grade != ''">
+				grade = #{level,jdbcType=TINYINT},
+			</if>
+			<if test=" name!= null and name != ''">
+				name = #{name,jdbcType=VARCHAR}
+			</if>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update mrht_goods_class  MrhtGoodsClass set
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_goods_class MrhtGoodsClass set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		delete from mrht_goods_class MrhtGoodsClass
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtGoodsClass">
+		update mrht_goods_class MrhtGoodsClass set deleted=1
+		where id=#{id}
+	</update>
+
+
+	<resultMap id="goodsClassMap" type="com.cndinuo.vo.GoodsClassVO">
+		<result property="id" column="code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="pId" column="par_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="getSelectData" parameterType="java.lang.String" resultMap="goodsClassMap">
+		select code,par_code,name from mrht_goods_class
+	</select>
+
+</mapper>

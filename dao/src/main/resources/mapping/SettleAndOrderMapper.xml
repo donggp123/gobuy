@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SettleAndOrderDao">
+    <resultMap id="settleAndOrderMap" type="com.cndinuo.domain.SettleAndOrder">
+        <result property="orderNo" column="order_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="retNo" column="ret_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="settleNo" column="settle_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="type" column="type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		order_no,
+		ret_no,
+		settle_no,
+		type
+	</sql>
+    <select id="getById" resultMap="settleAndOrderMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from settle_and_order  settleAndOrder
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="settleAndOrderMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from settle_and_order  settleAndOrder
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="settleAndOrderMap" parameterType="com.cndinuo.domain.SettleAndOrder">
+		select <include refid="cols"/> from settle_and_order  settleAndOrder
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="settleAndOrderMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from settle_and_order  settleAndOrder
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from settle_and_order  settleAndOrder
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from settle_and_order  settleAndOrder
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from settle_and_order  settleAndOrder
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.SettleAndOrder" useGeneratedKeys="true" keyProperty="id">
+		insert into settle_and_order
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" orderNo != null and orderNo != ''">
+				order_no,
+			</if>
+			<if test=" retNo != null and retNo != ''">
+				ret_no,
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				settle_no,
+			</if>
+			<if test=" type != null and type != ''">
+				type
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" retNo != null and retNo != ''">
+				#{retNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				#{settleNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" type != null and type != ''">
+				#{type,jdbcType=TINYINT}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.SettleAndOrder">
+		update settle_and_order settleAndOrder
+		<set>
+			<if test=" orderNo != null and orderNo != ''">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" retNo != null and retNo != ''">
+				ret_no = #{retNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" settleNo != null and settleNo != ''">
+				settle_no = #{settleNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" type != null and type != ''">
+				type = #{type,jdbcType=TINYINT}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update settle_and_order  settleAndOrder set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update settle_and_order settleAndOrder set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update settle_and_order settleAndOrder set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.SettleAndOrder">
+		update settle_and_order settleAndOrder set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

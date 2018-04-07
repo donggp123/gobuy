@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtStockDao">
+    <resultMap id="mrhtStockMap" type="com.cndinuo.domain.MrhtStock">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="stockLimit" column="stock_limit" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="purNum" column="pur_num" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mrht_id,
+		stock_limit,
+		pur_num
+	</sql>
+    <select id="getById" resultMap="mrhtStockMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mrht_stock  MrhtStock
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mrhtStockMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_stock  MrhtStock
+		<where>
+			<if test="mrhtId != null and mrhtId != ''" >
+				and mrht_id = ${mrhtId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mrhtStockMap" parameterType="com.cndinuo.domain.MrhtStock">
+		select <include refid="cols"/> from mrht_stock  MrhtStock
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mrhtStockMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mrht_stock  MrhtStock
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_stock  MrhtStock
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_stock  MrhtStock
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_stock  MrhtStock
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtStock" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_stock (
+			mrht_id,
+			stock_limit,
+			pur_num) 
+		value (
+			#{mrhtId,jdbcType=INTEGER},
+			#{stockLimit,jdbcType=INTEGER},
+			#{purNum,jdbcType=INTEGER}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtStock">
+		update mrht_stock MrhtStock set
+			mrht_id = #{mrhtId,jdbcType=INTEGER},
+			stock_limit = #{stockLimit,jdbcType=INTEGER},
+			pur_num = #{purNum,jdbcType=INTEGER}
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update mrht_stock  MrhtStock set
+			stock_limit = #{stockLimit,jdbcType=INTEGER},
+			pur_num = #{purNum,jdbcType=INTEGER}
+		<where>
+			<if test="mrhtId != null and mrhtId != ''" >
+				and mrht_id = #{mrhtId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_stock MrhtStock set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_stock MrhtStock set deleted=1
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtStock">
+		update mrht_stock MrhtStock set deleted=1
+		where id=#{id}
+	</update>
+</mapper>

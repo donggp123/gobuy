@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MberReceiptDao">
+    <resultMap id="mberReceiptMap" type="com.cndinuo.domain.MberReceipt">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="name" column="name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="gender" column="gender" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="mobile" column="mobile" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="province" column="province" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="city" column="city" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="district" column="district" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="address" column="address" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="zipCode" column="zip_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="isDefault" column="is_default" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mber_id,
+		name,
+		gender,
+		mobile,
+		province,
+		city,
+		district,
+		address,
+		zip_code,
+		is_default
+	</sql>
+    <select id="getById" resultMap="mberReceiptMap" parameterType="java.lang.Integer">
+		select
+			mr.id,
+			mr.mber_id,
+			mr.name,
+			mr.gender,
+			mr.mobile,
+			mr.province,
+			mr.city,
+			mr.district,
+            (select name from sys_area where id = mr.district) as distName,
+			mr.address,
+			mr.zip_code,
+			mr.is_default,
+			CONCAT((select merger_name from sys_area where id = mr.district),mr.address) as addr
+		from mber_receipt  mr
+		 where mr.id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="mberReceiptMap" parameterType="java.util.Map">
+		select
+			mr.id,
+			mr.mber_id,
+			mr.name,
+			mr.gender,
+			mr.mobile,
+			mr.province,
+			mr.city,
+			mr.district,
+			mr.address,
+			mr.zip_code,
+			mr.is_default,
+			(select name from sys_area where id = mr.city) as cityName,
+			CONCAT((select merger_name from sys_area where id = mr.district),mr.address) as addr
+		from mber_receipt  mr
+		<where>
+			<if test="mberId != null">
+				mr.mber_id = #{mberId}
+			</if>
+			<if test="isDefault != null">
+				and mr.is_default = #{isDefault}
+			</if>
+		</where>
+        order by is_default desc
+	</select>
+    <select id="getByEntity" resultMap="mberReceiptMap" parameterType="com.cndinuo.domain.MberReceipt">
+		select <include refid="cols"/> from mber_receipt  mberReceipt
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mberReceiptMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mber_receipt  mberReceipt
+		<where>
+			<if test="p != null and p.mberId != null" >
+				and mber_id = #{p.mberId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mber_receipt  mberReceipt
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mber_receipt  mberReceipt
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mber_receipt  mberReceipt
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MberReceipt" useGeneratedKeys="true" keyProperty="id">
+		insert into mber_receipt
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" name != null and name != ''">
+				name,
+			</if>
+			<if test=" gender != null and gender != ''">
+				gender,
+			</if>
+			<if test=" mobile != null and mobile != ''">
+				mobile,
+			</if>
+			<if test=" province != null and province != ''">
+				province,
+			</if>
+			<if test=" city != null and city != ''">
+				city,
+			</if>
+			<if test=" district != null and district != ''">
+				district,
+			</if>
+			<if test=" address != null and address != ''">
+				address,
+			</if>
+			<if test=" zipCode != null and zipCode != ''">
+				zip_code,
+			</if>
+			<if test=" isDefault != null">
+				is_default
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" name != null and name != ''">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test=" gender != null and gender != ''">
+				#{gender,jdbcType=TINYINT},
+			</if>
+			<if test=" mobile != null and mobile != ''">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" province != null and province != ''">
+				#{province,jdbcType=VARCHAR},
+			</if>
+			<if test=" city != null and city != ''">
+				#{city,jdbcType=VARCHAR},
+			</if>
+			<if test=" district != null and district != ''">
+				#{district,jdbcType=VARCHAR},
+			</if>
+			<if test=" address != null and address != ''">
+				#{address,jdbcType=VARCHAR},
+			</if>
+			<if test=" zipCode != null and zipCode != ''">
+				#{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" isDefault != null">
+				#{isDefault,jdbcType=TINYINT}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MberReceipt">
+		update mber_receipt mberReceipt
+		<set>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" name != null and name != ''">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test=" gender != null and gender != ''">
+				gender = #{gender,jdbcType=TINYINT},
+			</if>
+			<if test=" mobile != null and mobile != ''">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" province != null and province != ''">
+				province = #{province,jdbcType=VARCHAR},
+			</if>
+			<if test=" city != null and city != ''">
+				city = #{city,jdbcType=VARCHAR},
+			</if>
+			<if test=" district != null and district != ''">
+				district = #{district,jdbcType=VARCHAR},
+			</if>
+			<if test=" address != null and address != ''">
+				address = #{address,jdbcType=VARCHAR},
+			</if>
+			<if test=" zipCode != null and zipCode != ''">
+				zip_code = #{zipCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" isDefault != null">
+				is_default = #{isDefault,jdbcType=TINYINT}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update mber_receipt  mberReceipt set
+		<if test="isDefault != null " >
+			is_default = #{isDefault}
+		</if>
+		<where>
+			<if test="mberId != null">
+				and mber_id = #{mberId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mber_receipt mberReceipt set deleted=1
+		where id=#{id}
+	</update>
+    <delete id="deleteByMap" parameterType="java.util.Map">
+		delete from mber_receipt
+		<where>
+			<if test="mberId != null">
+				and mber_id = #{mberId}
+			</if>
+			<if test="ids != null and ids != ''" >
+				and id in (${ids})
+			</if>
+		</where>
+		<!-- 添加条件属性 -->
+	</delete>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MberReceipt">
+		update mber_receipt mberReceipt set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

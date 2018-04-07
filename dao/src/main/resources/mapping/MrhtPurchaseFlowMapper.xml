@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtPurchaseFlowDao">
+    <resultMap id="mrhtPurchaseFlowMap" type="com.cndinuo.domain.MrhtPurchaseFlow">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="purId" column="pur_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="quote" column="quote" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="supplierId" column="supplier_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="supplierName" column="supplier_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="isAccept" column="is_accept" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="isReturn" column="is_return" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="payType" column="pay_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		pur_id,
+		quote,
+		supplier_id,
+		supplier_name,
+		is_accept,
+		remark,
+		is_return,
+		pay_type
+	</sql>
+    <select id="getById" resultMap="mrhtPurchaseFlowMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mrht_purchase_flow  MrhtPurchaseFlow
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mrhtPurchaseFlowMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_purchase_flow  MrhtPurchaseFlow
+		<where>
+			<if test="isAccept != null" >
+				and is_accept = #{isAccept}
+			</if>
+			<if test="purId != null">
+				and pur_id = #{purId}
+			</if>
+			<if test="supplierId != null and supplierId != ''">
+				and supplier_id = #{supplierId}
+			</if>
+			<if test="isAccept == 0">
+				and is_accept = #{isAccept}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mrhtPurchaseFlowMap" parameterType="com.cndinuo.domain.MrhtPurchaseFlow">
+		select <include refid="cols"/> from mrht_purchase_flow  MrhtPurchaseFlow
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mrhtPurchaseFlowMap" parameterType="com.cndinuo.page.Page">
+		select
+			id,
+			pur_id,
+			quote,
+			supplier_id,
+			supplier_name,
+			is_accept,
+			remark,
+			(
+				SELECT
+				GROUP_CONCAT(name) from sys_dict d
+				WHERE
+				d.`table` = 'mrht_goods'
+				AND d.`field` = 'is_return'
+				AND find_in_set(d.value,m.is_return)
+			) as returnName,
+			is_return,
+			pay_type
+		from mrht_purchase_flow  m
+		<where>
+			<if test="p.isAccept != null">
+				and is_accept = #{p.isAccept}
+			</if>
+			<if test="p != null and p.supplierName != null and p.supplierName != ''" >
+				and supplier_name like CONCAT('%',#{p.supplierName},'%')
+			</if>
+				and pur_id = #{p.purId}
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase_flow  MrhtPurchaseFlow
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase_flow  MrhtPurchaseFlow
+		<where>
+			<if test="isAccept != null " >
+				and is_accept = #{isAccept}
+			</if>
+			<if test="purId != null ">
+				and pur_id = #{purId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_purchase_flow  MrhtPurchaseFlow
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtPurchaseFlow" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_purchase_flow (
+			pur_id,
+			quote,
+			supplier_id,
+			supplier_name,
+			is_accept,
+			remark,
+			is_return,
+			pay_type)
+		value (
+			#{purId,jdbcType=INTEGER},
+			#{quote,jdbcType=DECIMAL},
+			#{supplierId,jdbcType=INTEGER},
+			#{supplierName,jdbcType=VARCHAR},
+			#{isAccept,jdbcType=TINYINT},
+			#{remark,jdbcType=VARCHAR},
+			#{isReturn,jdbcType=VARCHAR},
+			#{payType,jdbcType=TINYINT}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtPurchaseFlow">
+		update mrht_purchase_flow MrhtPurchaseFlow set
+			pur_id = #{purId,jdbcType=INTEGER},
+			quote = #{quote,jdbcType=DECIMAL},
+			supplier_id = #{supplierId,jdbcType=INTEGER},
+			supplier_name = #{supplierName,jdbcType=VARCHAR},
+			is_accept = #{isAccept,jdbcType=TINYINT},
+			remark = #{remark,jdbcType=VARCHAR},
+			is_return = #{isReturn,jdbcType=VARCHAR},
+			pay_type = #{payType,jdbcType=TINYINT}
+		 where id= #{id}
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update mrht_purchase_flow  MrhtPurchaseFlow
+		set is_accept = #{isAccept}
+		<where>
+			<if test="purId != null">
+				and pur_id = #{purId}
+			</if>
+			<if test="id != null">
+				and id = #{id}
+			</if>
+			and is_accept = 0
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_purchase_flow MrhtPurchaseFlow set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_purchase_flow MrhtPurchaseFlow set
+		<if test="isAccept != null">
+			is_accept = #{isAccept}
+		</if>
+		<where>
+			<if test="purId != null" >
+				and pur_id = #{purId}
+			</if>
+			and is_accept = 1 or is_accept = 2 or is_accept = 0
+		</where>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtPurchaseFlow">
+		update mrht_purchase_flow MrhtPurchaseFlow set deleted=1
+		where id=#{id}
+	</update>
+</mapper>

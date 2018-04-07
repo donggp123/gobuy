@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.AlipayFlowDao">
+    <resultMap id="alipayFlowMap" type="com.cndinuo.domain.AlipayFlow">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="notifyTime" column="notify_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="notifyType" column="notify_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="notifyId" column="notify_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="signType" column="sign_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sign" column="sign" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="tradeNo" column="trade_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="outTradeNo" column="out_trade_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="outBizNo" column="out_biz_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="buyerId" column="buyer_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="buyerLoginId" column="buyer_login_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sellerId" column="seller_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sellerEmail" column="seller_email" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="tradeStatus" column="trade_status" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="totalAmount" column="total_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="receiptAmount" column="receipt_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="invoiceAmount" column="invoice_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="buyerPayAmount" column="buyer_pay_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="pointAmount" column="point_amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="refundFee" column="refund_fee" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="subject" column="subject" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="body" column="body" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="gmtCreate" column="gmt_create" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="gmtPayment" column="gmt_payment" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="gmtRefund" column="gmt_refund" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="gmtClose" column="gmt_close" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="fundBillList" column="fund_bill_list" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="passbackParams" column="passback_params" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="voucherDetailList" column="voucher_detail_list" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="fundChange" column="fund_change" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="refundDetailItemList" column="refund_detail_item_list" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		notify_time,
+		notify_type,
+		notify_id,
+		sign_type,
+		sign,
+		trade_no,
+		out_trade_no,
+		out_biz_no,
+		buyer_id,
+		buyer_login_id,
+		seller_id,
+		seller_email,
+		trade_status,
+		total_amount,
+		receipt_amount,
+		invoice_amount,
+		buyer_pay_amount,
+		point_amount,
+		refund_fee,
+		subject,
+		body,
+		gmt_create,
+		gmt_payment,
+		gmt_refund,
+		gmt_close,
+		fund_bill_list,
+		passback_params,
+		voucher_detail_list,
+		fund_change,
+        refund_detail_item_list
+	</sql>
+    <select id="getById" resultMap="alipayFlowMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from alipay_flow  alipayFlow
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="alipayFlowMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from alipay_flow  where out_trade_no = #{orderNo}
+	</select>
+    <select id="getByEntity" resultMap="alipayFlowMap" parameterType="com.cndinuo.domain.AlipayFlow">
+		select <include refid="cols"/> from alipay_flow  alipayFlow
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="alipayFlowMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from alipay_flow  alipayFlow
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from alipay_flow  alipayFlow
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from alipay_flow  alipayFlow
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from alipay_flow  alipayFlow
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.AlipayFlow" useGeneratedKeys="true" keyProperty="id">
+		insert into alipay_flow
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" notifyTime != null and notifyTime != ''">
+				notify_time,
+			</if>
+			<if test=" notifyType != null and notifyType != ''">
+				notify_type,
+			</if>
+			<if test=" notifyId != null and notifyId != ''">
+				notify_id,
+			</if>
+			<if test=" signType != null and signType != ''">
+				sign_type,
+			</if>
+			<if test=" sign != null and sign != ''">
+				sign,
+			</if>
+			<if test=" tradeNo != null and tradeNo != ''">
+				trade_no,
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				out_trade_no,
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				out_biz_no,
+			</if>
+			<if test=" buyerId != null and buyerId != ''">
+				buyer_id,
+			</if>
+			<if test=" buyerLoginId != null and buyerLoginId != ''">
+				buyer_login_id,
+			</if>
+			<if test=" sellerId != null and sellerId != ''">
+				seller_id,
+			</if>
+			<if test=" sellerEmail != null and sellerEmail != ''">
+				seller_email,
+			</if>
+			<if test=" tradeStatus != null and tradeStatus != ''">
+				trade_status,
+			</if>
+			<if test=" totalAmount != null and totalAmount != ''">
+				total_amount,
+			</if>
+			<if test=" receiptAmount != null and receiptAmount != ''">
+				receipt_amount,
+			</if>
+			<if test=" invoiceAmount != null and invoiceAmount != ''">
+				invoice_amount,
+			</if>
+			<if test=" buyerPayAmount != null and buyerPayAmount != ''">
+				buyer_pay_amount,
+			</if>
+			<if test=" pointAmount != null and pointAmount != ''">
+				point_amount,
+			</if>
+			<if test=" refundFee != null and refundFee != ''">
+				refund_fee,
+			</if>
+			<if test=" subject != null and subject != ''">
+				subject,
+			</if>
+			<if test=" body != null and body != ''">
+				body,
+			</if>
+			<if test=" gmtCreate != null and gmtCreate != ''">
+				gmt_create,
+			</if>
+			<if test=" gmtPayment != null and gmtPayment != ''">
+				gmt_payment,
+			</if>
+			<if test=" gmtRefund != null and gmtRefund != ''">
+				gmt_refund,
+			</if>
+			<if test=" gmtClose != null and gmtClose != ''">
+				gmt_close,
+			</if>
+			<if test=" fundBillList != null and fundBillList != ''">
+				fund_bill_list,
+			</if>
+			<if test=" passbackParams != null and passbackParams != ''">
+				passback_params,
+			</if>
+			<if test=" voucherDetailList != null and voucherDetailList != ''">
+				voucher_detail_list,
+			</if>
+			<if test=" fundChange != null and fundChange != ''">
+                fund_change,
+			</if>
+			<if test=" refundDetailItemList != null and refundDetailItemList != ''">
+                refund_detail_item_list
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" notifyTime != null and notifyTime != ''">
+				#{notifyTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" notifyType != null and notifyType != ''">
+				#{notifyType,jdbcType=VARCHAR},
+			</if>
+			<if test=" notifyId != null and notifyId != ''">
+				#{notifyId,jdbcType=VARCHAR},
+			</if>
+			<if test=" signType != null and signType != ''">
+				#{signType,jdbcType=VARCHAR},
+			</if>
+			<if test=" sign != null and sign != ''">
+				#{sign,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeNo != null and tradeNo != ''">
+				#{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				#{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				#{outBizNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" buyerId != null and buyerId != ''">
+				#{buyerId,jdbcType=VARCHAR},
+			</if>
+			<if test=" buyerLoginId != null and buyerLoginId != ''">
+				#{buyerLoginId,jdbcType=VARCHAR},
+			</if>
+			<if test=" sellerId != null and sellerId != ''">
+				#{sellerId,jdbcType=VARCHAR},
+			</if>
+			<if test=" sellerEmail != null and sellerEmail != ''">
+				#{sellerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeStatus != null and tradeStatus != ''">
+				#{tradeStatus,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalAmount != null and totalAmount != ''">
+				#{totalAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" receiptAmount != null and receiptAmount != ''">
+				#{receiptAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" invoiceAmount != null and invoiceAmount != ''">
+				#{invoiceAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" buyerPayAmount != null and buyerPayAmount != ''">
+				#{buyerPayAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" pointAmount != null and pointAmount != ''">
+				#{pointAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" refundFee != null and refundFee != ''">
+				#{refundFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" subject != null and subject != ''">
+				#{subject,jdbcType=VARCHAR},
+			</if>
+			<if test=" body != null and body != ''">
+				#{body,jdbcType=VARCHAR},
+			</if>
+			<if test=" gmtCreate != null and gmtCreate != ''">
+				#{gmtCreate,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtPayment != null and gmtPayment != ''">
+				#{gmtPayment,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtRefund != null and gmtRefund != ''">
+				#{gmtRefund,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtClose != null and gmtClose != ''">
+				#{gmtClose,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" fundBillList != null and fundBillList != ''">
+				#{fundBillList,jdbcType=VARCHAR},
+			</if>
+			<if test=" passbackParams != null and passbackParams != ''">
+				#{passbackParams,jdbcType=VARCHAR},
+			</if>
+			<if test=" voucherDetailList != null and voucherDetailList != ''">
+				#{voucherDetailList,jdbcType=VARCHAR},
+			</if>
+			<if test=" fundChange != null and fundChange != ''">
+				#{fundChange,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundDetailItemList != null and refundDetailItemList != ''">
+				#{refundDetailItemList,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.AlipayFlow">
+		update alipay_flow alipayFlow
+		<set>
+			<if test=" notifyTime != null and notifyTime != ''">
+				notify_time = #{notifyTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" notifyType != null and notifyType != ''">
+				notify_type = #{notifyType,jdbcType=VARCHAR},
+			</if>
+			<if test=" notifyId != null and notifyId != ''">
+				notify_id = #{notifyId,jdbcType=VARCHAR},
+			</if>
+			<if test=" signType != null and signType != ''">
+				sign_type = #{signType,jdbcType=VARCHAR},
+			</if>
+			<if test=" sign != null and sign != ''">
+				sign = #{sign,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeNo != null and tradeNo != ''">
+				trade_no = #{tradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				out_trade_no = #{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" outBizNo != null and outBizNo != ''">
+				out_biz_no = #{outBizNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" buyerId != null and buyerId != ''">
+				buyer_id = #{buyerId,jdbcType=VARCHAR},
+			</if>
+			<if test=" buyerLoginId != null and buyerLoginId != ''">
+				buyer_login_id = #{buyerLoginId,jdbcType=VARCHAR},
+			</if>
+			<if test=" sellerId != null and sellerId != ''">
+				seller_id = #{sellerId,jdbcType=VARCHAR},
+			</if>
+			<if test=" sellerEmail != null and sellerEmail != ''">
+				seller_email = #{sellerEmail,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeStatus != null and tradeStatus != ''">
+				trade_status = #{tradeStatus,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalAmount != null and totalAmount != ''">
+				total_amount = #{totalAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" receiptAmount != null and receiptAmount != ''">
+				receipt_amount = #{receiptAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" invoiceAmount != null and invoiceAmount != ''">
+				invoice_amount = #{invoiceAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" buyerPayAmount != null and buyerPayAmount != ''">
+				buyer_pay_amount = #{buyerPayAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" pointAmount != null and pointAmount != ''">
+				point_amount = #{pointAmount,jdbcType=DECIMAL},
+			</if>
+			<if test=" refundFee != null and refundFee != ''">
+				refund_fee = #{refundFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" subject != null and subject != ''">
+				subject = #{subject,jdbcType=VARCHAR},
+			</if>
+			<if test=" body != null and body != ''">
+				body = #{body,jdbcType=VARCHAR},
+			</if>
+			<if test=" gmtCreate != null and gmtCreate != ''">
+				gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtPayment != null and gmtPayment != ''">
+				gmt_payment = #{gmtPayment,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtRefund != null and gmtRefund != ''">
+				gmt_refund = #{gmtRefund,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" gmtClose != null and gmtClose != ''">
+				gmt_close = #{gmtClose,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" fundBillList != null and fundBillList != ''">
+				fund_bill_list = #{fundBillList,jdbcType=VARCHAR},
+			</if>
+			<if test=" passbackParams != null and passbackParams != ''">
+				passback_params = #{passbackParams,jdbcType=VARCHAR},
+			</if>
+			<if test=" voucherDetailList != null and voucherDetailList != ''">
+				voucher_detail_list = #{voucherDetailList,jdbcType=VARCHAR},
+			</if>
+			<if test=" fundChange != null and fundChange != ''">
+                fundChange = #{fund_change,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundDetailItemList != null and refundDetailItemList != ''">
+                refund_detail_item_list = #{refundDetailItemList,jdbcType=VARCHAR}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update alipay_flow  alipayFlow set
+            refund_fee = #{refundFee},
+            gmt_refund = #{gmtRefund},
+            fund_change = #{fundChange},
+            refund_detail_item_list = #{refundDetailItemList}
+        where out_trade_no = #{outTradeNo}
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update alipay_flow alipayFlow set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update alipay_flow alipayFlow set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.AlipayFlow">
+		update alipay_flow alipayFlow set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

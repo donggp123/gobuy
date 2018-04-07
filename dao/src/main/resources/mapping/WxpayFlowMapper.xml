@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.WxpayFlowDao">
+    <resultMap id="wxpayFlowMap" type="com.cndinuo.domain.WxpayFlow">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="deviceInfo" column="device_info" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="nonceStr" column="nonce_str" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sign" column="sign" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="openId" column="open_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="isSubscribe" column="is_subscribe" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="tradeType" column="trade_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="bankType" column="bank_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="totalFee" column="total_fee" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="feeType" column="fee_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="cashFee" column="cash_fee" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="cashFeeType" column="cash_fee_type" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="couponFee" column="coupon_fee" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="couponCount" column="coupon_count" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="transactionId" column="transaction_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="outTradeNo" column="out_trade_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="totalNo" column="total_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="attach" column="attach" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="timeEnd" column="time_end" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="resultCode" column="result_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errCode" column="err_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="errCodeDes" column="err_code_des" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="refundChannel" column="refund_channel" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="refundId" column="refund_id" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mber_id,
+		device_info,
+		nonce_str,
+		sign,
+		open_id,
+		is_subscribe,
+		trade_type,
+		bank_type,
+		total_fee,
+		fee_type,
+		cash_fee,
+		cash_fee_type,
+		coupon_fee,
+		coupon_count,
+		transaction_id,
+		out_trade_no,
+		total_no,
+		attach,
+		time_end,
+		result_code,
+		err_code,
+		err_code_des,
+		refund_channel,
+		refund_id
+	</sql>
+    <select id="getById" resultMap="wxpayFlowMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from wxpay_flow  wxpayFlow
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="wxpayFlowMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from wxpay_flow  wxpayFlow
+		<where>
+			<if test="orderNo != null and orderNo != ''" >
+				and out_trade_no = #{orderNo}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="wxpayFlowMap" parameterType="com.cndinuo.domain.WxpayFlow">
+		select <include refid="cols"/> from wxpay_flow  wxpayFlow
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="wxpayFlowMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from wxpay_flow  wxpayFlow
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from wxpay_flow  wxpayFlow
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from wxpay_flow  wxpayFlow
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from wxpay_flow  wxpayFlow
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.WxpayFlow" useGeneratedKeys="true" keyProperty="id">
+		insert into wxpay_flow
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" deviceInfo != null and deviceInfo != ''">
+				device_info,
+			</if>
+			<if test=" nonceStr != null and nonceStr != ''">
+				nonce_str,
+			</if>
+			<if test=" sign != null and sign != ''">
+				sign,
+			</if>
+			<if test=" openId != null and openId != ''">
+				open_id,
+			</if>
+			<if test=" isSubscribe != null and isSubscribe != ''">
+				is_subscribe,
+			</if>
+			<if test=" tradeType != null and tradeType != ''">
+				trade_type,
+			</if>
+			<if test=" bankType != null and bankType != ''">
+				bank_type,
+			</if>
+			<if test=" totalFee != null and totalFee != ''">
+				total_fee,
+			</if>
+			<if test=" feeType != null and feeType != ''">
+				fee_type,
+			</if>
+			<if test=" cashFee != null and cashFee != ''">
+				cash_fee,
+			</if>
+			<if test=" cashFeeType != null and cashFeeType != ''">
+				cash_fee_type,
+			</if>
+			<if test=" couponFee != null and couponFee != ''">
+				coupon_fee,
+			</if>
+			<if test=" couponCount != null and couponCount != ''">
+				coupon_count,
+			</if>
+			<if test=" transactionId != null and transactionId != ''">
+				transaction_id,
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				out_trade_no,
+			</if>
+			<if test=" totalNo != null and totalNo != ''">
+				total_no,
+			</if>
+			<if test=" attach != null and attach != ''">
+				attach,
+			</if>
+			<if test=" timeEnd != null and timeEnd != ''">
+				time_end,
+			</if>
+			<if test=" resultCode != null and resultCode != ''">
+				result_code,
+			</if>
+			<if test=" errCode != null and errCode != ''">
+				err_code,
+			</if>
+			<if test=" errCodeDes != null and errCodeDes != ''">
+				err_code_des,
+			</if>
+			<if test=" refundChannel != null and refundChannel != ''">
+				refund_channel,
+			</if>
+			<if test=" refundId != null and refundId != ''">
+				refund_id
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" deviceInfo != null and deviceInfo != ''">
+				#{deviceInfo,jdbcType=VARCHAR},
+			</if>
+			<if test=" nonceStr != null and nonceStr != ''">
+				#{nonceStr,jdbcType=VARCHAR},
+			</if>
+			<if test=" sign != null and sign != ''">
+				#{sign,jdbcType=VARCHAR},
+			</if>
+			<if test=" openId != null and openId != ''">
+				#{openId,jdbcType=VARCHAR},
+			</if>
+			<if test=" isSubscribe != null and isSubscribe != ''">
+				#{isSubscribe,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeType != null and tradeType != ''">
+				#{tradeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" bankType != null and bankType != ''">
+				#{bankType,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalFee != null and totalFee != ''">
+				#{totalFee,jdbcType=INTEGER},
+			</if>
+			<if test=" feeType != null and feeType != ''">
+				#{feeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" cashFee != null and cashFee != ''">
+				#{cashFee,jdbcType=INTEGER},
+			</if>
+			<if test=" cashFeeType != null and cashFeeType != ''">
+				#{cashFeeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" couponFee != null and couponFee != ''">
+				#{couponFee,jdbcType=INTEGER},
+			</if>
+			<if test=" couponCount != null and couponCount != ''">
+				#{couponCount,jdbcType=INTEGER},
+			</if>
+			<if test=" transactionId != null and transactionId != ''">
+				#{transactionId,jdbcType=VARCHAR},
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				#{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalNo != null and totalNo != ''">
+				#{totalNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" attach != null and attach != ''">
+				#{attach,jdbcType=VARCHAR},
+			</if>
+			<if test=" timeEnd != null and timeEnd != ''">
+				#{timeEnd,jdbcType=VARCHAR},
+			</if>
+			<if test=" resultCode != null and resultCode != ''">
+				#{resultCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" errCode != null and errCode != ''">
+				#{errCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" errCodeDes != null and errCodeDes != ''">
+				#{errCodeDes,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundChannel != null and refundChannel != ''">
+				#{refundChannel,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundId != null and refundId != ''">
+				#{refundId,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.WxpayFlow">
+		update wxpay_flow wxpayFlow
+		<set>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" deviceInfo != null and deviceInfo != ''">
+				device_info = #{deviceInfo,jdbcType=VARCHAR},
+			</if>
+			<if test=" nonceStr != null and nonceStr != ''">
+				nonce_str = #{nonceStr,jdbcType=VARCHAR},
+			</if>
+			<if test=" sign != null and sign != ''">
+				sign = #{sign,jdbcType=VARCHAR},
+			</if>
+			<if test=" openId != null and openId != ''">
+				open_id = #{openId,jdbcType=VARCHAR},
+			</if>
+			<if test=" isSubscribe != null and isSubscribe != ''">
+				is_subscribe = #{isSubscribe,jdbcType=VARCHAR},
+			</if>
+			<if test=" tradeType != null and tradeType != ''">
+				trade_type = #{tradeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" bankType != null and bankType != ''">
+				bank_type = #{bankType,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalFee != null and totalFee != ''">
+				total_fee = #{totalFee,jdbcType=INTEGER},
+			</if>
+			<if test=" feeType != null and feeType != ''">
+				fee_type = #{feeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" cashFee != null and cashFee != ''">
+				cash_fee = #{cashFee,jdbcType=INTEGER},
+			</if>
+			<if test=" cashFeeType != null and cashFeeType != ''">
+				cash_fee_type = #{cashFeeType,jdbcType=VARCHAR},
+			</if>
+			<if test=" couponFee != null and couponFee != ''">
+				coupon_fee = #{couponFee,jdbcType=INTEGER},
+			</if>
+			<if test=" couponCount != null and couponCount != ''">
+				coupon_count = #{couponCount,jdbcType=INTEGER},
+			</if>
+			<if test=" transactionId != null and transactionId != ''">
+				transaction_id = #{transactionId,jdbcType=VARCHAR},
+			</if>
+			<if test=" outTradeNo != null and outTradeNo != ''">
+				out_trade_no = #{outTradeNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" totalNo != null and totalNo != ''">
+				total_no = #{totalNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" attach != null and attach != ''">
+				attach = #{attach,jdbcType=VARCHAR},
+			</if>
+			<if test=" timeEnd != null and timeEnd != ''">
+				time_end = #{timeEnd,jdbcType=VARCHAR},
+			</if>
+			<if test=" resultCode != null and resultCode != ''">
+				result_code = #{resultCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" errCode != null and errCode != ''">
+				err_code = #{errCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" errCodeDes != null and errCodeDes != ''">
+				err_code_des = #{errCodeDes,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundChannel != null and refundChannel != ''">
+				refund_channel = #{refundChannel,jdbcType=VARCHAR},
+			</if>
+			<if test=" refundId != null and refundId != ''">
+				refund_id = #{refundId,jdbcType=VARCHAR}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update wxpay_flow  wxpayFlow
+			set
+				refund_channel = #{refundChannel},
+				refund_id = #{refundId}
+		where out_trade_no = #{orderNo}
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update wxpay_flow wxpayFlow set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update wxpay_flow wxpayFlow set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.WxpayFlow">
+		update wxpay_flow wxpayFlow set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

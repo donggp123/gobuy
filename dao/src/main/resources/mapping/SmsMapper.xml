@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.SmsDao">
+    <resultMap id="smsMap" type="com.cndinuo.domain.Sms">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mobile" column="mobile" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="verifCode" column="verif_code" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="ip" column="ip" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="expireTime" column="expire_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="isUse" column="is_use" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="useTime" column="use_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		mobile,
+		verif_code,
+		ip,
+		create_time,
+		expire_time,
+		is_use,
+		use_time
+	</sql>
+
+    <select id="getById" resultMap="smsMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from sms  sms
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="smsMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from sms  sms
+		<where>
+			<if test="mobile != null and mobile != ''" >
+				and mobile = #{mobile}
+			</if>
+			<if test="verifCode != null and verifCode != ''" >
+				and verif_code = #{verifCode}
+			</if>
+			<if test="ip != null and ip != ''" >
+				and ip = #{ip}
+			</if>
+			<if test="isUse != null" >
+				and is_use = #{isUse}
+			</if>
+			<if test="date != null and date != ''" >
+				and to_days(create_time) = to_days(#{date})
+			</if>
+		</where>
+		order by create_time desc
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="smsMap" parameterType="com.cndinuo.domain.Sms">
+		select <include refid="cols"/> from sms  sms
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="smsMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from sms  sms
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from sms  sms
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(1) from sms  sms
+		<where>
+			<if test="mobile != null and mobile != ''" >
+				and mobile = #{mobile}
+			</if>
+			<if test="ip != null and ip != ''" >
+				and ip = #{ip}
+			</if>
+			<if test="isUse != null" >
+				and is_use = #{isUse}
+			</if>
+			<if test="date != null and date != ''" >
+				and to_days(create_time) = to_days(#{date})
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from sms  sms
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.Sms" useGeneratedKeys="true" keyProperty="id">
+		insert into sms
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mobile != null and mobile != ''">
+				mobile,
+			</if>
+			<if test=" verifCode != null and verifCode != ''">
+				verif_code,
+			</if>
+			<if test=" ip != null and ip != ''">
+				ip,
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time,
+			</if>
+			<if test=" expireTime != null and expireTime != ''">
+				expire_time,
+			</if>
+			<if test=" isUse != null">
+				is_use,
+			</if>
+			<if test=" useTime != null and useTime != ''">
+				use_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mobile != null and mobile != ''">
+				#{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" verifCode != null and verifCode != ''">
+				#{verifCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" ip != null and ip != ''">
+				#{ip,jdbcType=VARCHAR},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" expireTime != null and expireTime != ''">
+				#{expireTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" isUse != null">
+				#{isUse,jdbcType=TINYINT},
+			</if>
+			<if test=" useTime != null and useTime != ''">
+				#{useTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.Sms">
+		update sms sms
+		<set>
+			<if test=" mobile != null and mobile != ''">
+				mobile = #{mobile,jdbcType=VARCHAR},
+			</if>
+			<if test=" verifCode != null and verifCode != ''">
+				verif_code = #{verifCode,jdbcType=VARCHAR},
+			</if>
+			<if test=" ip != null and ip != ''">
+				ip = #{ip,jdbcType=VARCHAR},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" expireTime != null and expireTime != ''">
+				expire_time = #{expireTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" isUse != null">
+				is_use = #{isUse,jdbcType=TINYINT},
+			</if>
+			<if test=" useTime != null and useTime != ''">
+				use_time = #{useTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update sms  sms set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update sms sms set deleted=1
+		where id=#{id}
+	</update>
+
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update sms sms set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.Sms">
+		update sms sms set deleted=1 
+		where id=#{id}
+	</update>
+
+</mapper>

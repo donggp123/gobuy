@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MberRiderPositionDao">
+    <resultMap id="mberRiderPositionMap" type="com.cndinuo.domain.MberRiderPosition">
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="lng" column="lng" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="lat" column="lat" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="cols">
+		mber_id,
+		lng,
+		lat,
+		update_time
+	</sql>
+    <select id="getById" resultMap="mberRiderPositionMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mber_rider_position  mberRiderPosition
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mberRiderPositionMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mber_rider_position  mberRiderPosition
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mberRiderPositionMap" parameterType="com.cndinuo.domain.MberRiderPosition">
+		select <include refid="cols"/> from mber_rider_position  mberRiderPosition
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mberRiderPositionMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mber_rider_position  mberRiderPosition
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mber_rider_position  mberRiderPosition
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mber_rider_position  mberRiderPosition
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mber_rider_position  mberRiderPosition
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MberRiderPosition" useGeneratedKeys="true" keyProperty="id">
+		insert into mber_rider_position
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" lng != null and lng != ''">
+				lng,
+			</if>
+			<if test=" lat != null and lat != ''">
+				lat,
+			</if>
+			<if test=" updateTime != null and updateTime != ''">
+				update_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" lng != null and lng != ''">
+				#{lng,jdbcType=VARCHAR},
+			</if>
+			<if test=" lat != null and lat != ''">
+				#{lat,jdbcType=VARCHAR},
+			</if>
+			<if test=" updateTime != null and updateTime != ''">
+				#{updateTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MberRiderPosition">
+		update mber_rider_position mberRiderPosition
+		<set>
+			<if test=" lng != null and lng != ''">
+				lng = #{lng,jdbcType=VARCHAR},
+			</if>
+			<if test=" lat != null and lat != ''">
+				lat = #{lat,jdbcType=VARCHAR},
+			</if>
+			<if test=" updateTime != null and updateTime != ''">
+				update_time = #{updateTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where mber_id= #{mberId}
+	</update>
+    <update id="updateByMap">
+		update mber_rider_position  mberRiderPosition set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mber_rider_position mberRiderPosition set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mber_rider_position mberRiderPosition set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MberRiderPosition">
+		update mber_rider_position mberRiderPosition set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

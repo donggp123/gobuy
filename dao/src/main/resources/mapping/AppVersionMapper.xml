@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.AppVersionDao">
+    <resultMap id="appVersionMap" type="com.cndinuo.domain.AppVersion">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="version" column="version" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="url" column="url" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="device" column="device" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		version,
+		url,
+		device,
+		create_time,
+		status
+	</sql>
+    <select id="getById" resultMap="appVersionMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from app_version  appVersion
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="appVersionMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from app_version  appVersion
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="appVersionMap" parameterType="com.cndinuo.domain.AppVersion">
+		select <include refid="cols"/> from app_version  appVersion
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="appVersionMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from app_version  appVersion
+		<where>
+			<if test="p != null and p.version != null and p.version != ''" >
+				and version like CONCAT('%',#{p.version},'%')
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from app_version  appVersion
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from app_version  appVersion
+		<where>
+			<if test="status != null" >
+				and status = #{status}
+			</if>
+			<if test="device != null">
+				and device = #{device}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from app_version  appVersion
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.AppVersion" useGeneratedKeys="true" keyProperty="id">
+		insert into app_version
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" version != null and version != ''">
+				version,
+			</if>
+			<if test=" url != null and url != ''">
+				url,
+			</if>
+			<if test=" device != null and device != ''">
+				device,
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time,
+			</if>
+			<if test=" status != null">
+				status
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" version != null and version != ''">
+				#{version,jdbcType=VARCHAR},
+			</if>
+			<if test=" url != null and url != ''">
+				#{url,jdbcType=VARCHAR},
+			</if>
+			<if test=" device != null and device != ''">
+				#{device,jdbcType=TINYINT},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" status != null">
+				#{status,jdbcType=TINYINT}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.AppVersion">
+		update app_version appVersion
+		<set>
+			<if test=" version != null and version != ''">
+				version = #{version,jdbcType=VARCHAR},
+			</if>
+			<if test=" url != null and url != ''">
+				url = #{url,jdbcType=VARCHAR},
+			</if>
+			<if test=" device != null and device != ''">
+				device = #{device,jdbcType=TINYINT},
+			</if>
+			<if test=" createTime != null and createTime != ''">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" status != null and status != ''">
+				status = #{status,jdbcType=TINYINT}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update app_version  appVersion
+		<set>
+			<if test=" status != null">
+				status = #{status,jdbcType=TINYINT}
+			</if>
+		</set>
+		<where>
+			<if test="id != null ">
+				and id = #{id}
+			</if>
+			<if test="device != null ">
+				and device = #{device}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update app_version appVersion set deleted=1
+		where id=#{id}
+	</update>
+    <delete id="deleteByMap" parameterType="java.util.Map">
+		delete  from app_version
+		<where>
+			<if test="ids != null and ids != ''" >
+				and id in (${ids})
+			</if>
+		</where>
+		<!-- 添加条件属性 -->
+	</delete>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.AppVersion">
+		update app_version appVersion set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MrhtAccountDao">
+    <resultMap id="mrhtAccountMap" type="com.cndinuo.domain.MrhtAccount">
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="amount" column="amount" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+    </resultMap>
+    <sql id="cols">
+		mrht_id,
+		amount
+	</sql>
+    <select id="getById" resultMap="mrhtAccountMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mrht_account  mrhtAccount
+		 where mrht_id = #{mrhtId}
+	</select>
+    <select id="getByMap" resultMap="mrhtAccountMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mrht_account  mrhtAccount
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mrhtAccountMap" parameterType="com.cndinuo.domain.MrhtAccount">
+		select <include refid="cols"/> from mrht_account  mrhtAccount
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mrhtAccountMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mrht_account  mrhtAccount
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mrht_account  mrhtAccount
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mrht_account  mrhtAccount
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mrht_account  mrhtAccount
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MrhtAccount" useGeneratedKeys="true" keyProperty="id">
+		insert into mrht_account
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" amount != null and amount != ''">
+				amount
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" amount != null and amount != ''">
+				#{amount,jdbcType=DECIMAL}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MrhtAccount">
+		update mrht_account mrhtAccount
+		<set>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" amount != null and amount != ''">
+				amount = #{amount,jdbcType=DECIMAL}
+			</if>
+		</set>
+		 where mrht_id= #{mrhtId}
+	</update>
+    <update id="updateByMap">
+		update mrht_account  mrhtAccount set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mrht_account mrhtAccount set deleted=1
+		where mrht_id = #{mrhtId}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mrht_account mrhtAccount set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MrhtAccount">
+		update mrht_account mrhtAccount set deleted=1 
+		where mrht_id = #{mrhtId}
+	</update>
+</mapper>

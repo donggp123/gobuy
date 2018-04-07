@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MessageDao">
+    <resultMap id="messageMap" type="com.cndinuo.domain.Message">
+        <result property="id" column="id" javaType="java.lang.Long" jdbcType="BIGINT"/>
+        <result property="title" column="title" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="from" column="from" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="fromName" column="from_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="to" column="to" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+		<result property="toName" column="to_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="text" column="text" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="sendTime" column="send_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+		<result property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		title,
+		`from`,
+		from_name,
+		`to`,
+		to_name,
+		text,
+		send_time,
+		status
+	</sql>
+    <select id="getById" resultMap="messageMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from message  message
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="messageMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from message  message
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="messageMap" parameterType="com.cndinuo.domain.Message">
+		select <include refid="cols"/> from message  message
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="messageMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from message  message
+		<where>
+			<if test="p != null and p.flag == 'from'" >
+				and `from` = #{p.from}
+			</if>
+			<if test="p != null and p.flag == 'to'" >
+				and `to` = #{p.to}
+			</if>
+			<if test="p != null and p.status != null" >
+				and status = #{p.status}
+			</if>
+		</where>
+		order by send_time desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from message  message
+	</select>
+    <select id="getCountByMap" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(1) from message  message
+		<where>
+			<if test="to != null" >
+				and `to` = #{to}
+			</if>
+			<if test="status != null" >
+				and status = #{status}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from message  message
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.Message" useGeneratedKeys="true" keyProperty="id">
+		insert into message (
+			<if test=" title!= null and title != ''">
+				title,
+			</if>
+			<if test=" from!= null and from != ''">
+				`from`,
+			</if>
+			<if test=" fromName!= null and fromName != ''">
+				from_name,
+			</if>
+			<if test=" to!= null and to != ''">
+				`to`,
+			</if>
+			<if test=" toName!= null and toName != ''">
+				to_name,
+			</if>
+			<if test=" text!= null and text != ''">
+				text,
+			</if>
+			<if test=" sendTime!= null and sendTime != ''">
+				send_time,
+			</if>
+			<if test=" status!= null">
+				status
+			</if>)
+		value (
+			<if test=" title!= null and title != ''">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test=" from!= null and from != ''">
+				#{from,jdbcType=INTEGER},
+			</if>
+			<if test=" fromName!= null and fromName != ''">
+				#{fromName,jdbcType=VARCHAR},
+			</if>
+			<if test=" to!= null and to != ''">
+				#{to,jdbcType=INTEGER},
+			</if>
+			<if test=" toName!= null and toName != ''">
+				#{toName,jdbcType=VARCHAR},
+			</if>
+			<if test=" text!= null and text != ''">
+				#{text,jdbcType=VARCHAR},
+			</if>
+			<if test=" sendTime!= null and sendTime != ''">
+				#{sendTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" status!= null">
+				#{status,jdbcType=TINYINT}
+			</if>
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.Message">
+		update message message set
+			<if test=" title!= null and title != ''">
+				title = #{title,jdbcType=VARCHAR},
+			</if>
+			<if test=" from!= null and from != ''">
+				`from` = #{from,jdbcType=INTEGER},
+			</if>
+			<if test=" fromName!= null and fromName != ''">
+				from_name = #{fromName,jdbcType=VARCHAR},
+			</if>
+			<if test=" to!= null and to != ''">
+				`to` = #{to,jdbcType=INTEGER},
+			</if>
+			<if test=" toName!= null and toName != ''">
+				to_name = #{toName,jdbcType=VARCHAR},
+			</if>
+			<if test=" text!= null and text != ''">
+				text = #{text,jdbcType=VARCHAR},
+			</if>
+			<if test=" sendTime!= null and sendTime != ''">
+				send_time = #{sendTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" status!= null and status != ''">
+				status = #{status,jdbcType=TINYINT}
+			</if>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update message  message set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update message message set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update message message set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.Message">
+		update message message set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

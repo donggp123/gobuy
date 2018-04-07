@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.OrderDeliveryDao">
+    <resultMap id="orderDeliveryMap" type="com.cndinuo.domain.OrderDelivery">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="orderNo" column="order_no" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="objId" column="obj_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="deliveryFee" column="delivery_fee" javaType="java.math.BigDecimal" jdbcType="DECIMAL"/>
+        <result property="deliveryTime" column="delivery_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="serviceTime" column="service_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		order_no,
+		obj_id,
+		delivery_fee,
+		delivery_time,
+		service_time
+	</sql>
+
+	<!--骑手已接单页面-->
+	<select id="getRiderByOrderDelivery" parameterType="java.util.Map" resultMap="orderDeliveryMap">
+		select
+			od.order_no,
+			od.delivery_fee,
+			od.delivery_time,
+			od.service_time,
+			IF(o.order_status=3,mi.address,o.receipt_addr) AS address,
+			IF(o.order_status=3,mi.mobile,o.receipt_mobile) as mobile,
+			compute_distance(rp.lng,rp.lat,mi.lng,mi.lat) as distance,
+			m.mrht_name as mrhtName,
+			mbr.nick_name as nickName,
+			o.order_status as orderStatus
+		from
+			order_delivery od,
+			`order` o,
+			mrht_info mi,
+			mber_rider_position rp,
+			merchant m,
+			mber_info mbr
+		where
+			od.obj_id = #{objId}
+			AND mi.mrht_id = o.mrht_id
+			AND o.order_no = od.order_no
+			AND order_status BETWEEN 3 AND 4
+			AND m.id = mi.mrht_id
+			AND rp.mber_id = mbr.mber_id
+	</select>
+
+	<select id="getRiderByTodayOrder" parameterType="com.cndinuo.page.Page" resultMap="orderDeliveryMap">
+		SELECT
+			o.mrht_name as mrhtName,
+			(SELECT track_status FROM order_track ot where ot.order_no = od.order_no ORDER BY track_time desc LIMIT 1) as orderStatus,
+			od.order_no,
+			(SELECT track_time FROM order_track ot where ot.order_no = od.order_no ORDER BY track_time desc LIMIT 1) as trackTime
+		FROM
+			`order` o,
+			order_delivery od
+		WHERE
+			od.obj_id = #{p.objId}
+			AND o.order_no = od.order_no
+			AND od.obj_id = o.mber_id
+			AND TO_DAYS(o.order_time) = TO_DAYS(NOW())
+
+	</select>
+
+	<select id="getRiderHistoryByOrder" parameterType="com.cndinuo.page.Page" resultMap="orderDeliveryMap">
+		SELECT
+			o.mrht_name as mrhtName,
+			od.order_no,
+			od.delivery_time,
+			od.service_time
+		FROM
+			`order` o,
+			order_delivery od
+		WHERE
+			od.obj_id = 3
+			AND o.order_no = od.order_no
+			AND od.obj_id = o.mber_id
+			AND TO_DAYS(o.order_time) != TO_DAYS(NOW())
+	</select>
+
+    <select id="getById" resultMap="orderDeliveryMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from order_delivery  orderDelivery
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="orderDeliveryMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from order_delivery  orderDelivery
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="orderDeliveryMap" parameterType="com.cndinuo.domain.OrderDelivery">
+		select <include refid="cols"/> from order_delivery  orderDelivery
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="orderDeliveryMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from order_delivery  orderDelivery
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from order_delivery  orderDelivery
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from order_delivery  orderDelivery
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from order_delivery  orderDelivery
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.OrderDelivery" useGeneratedKeys="true" keyProperty="id">
+		insert into order_delivery
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" orderNo != null and orderNo != ''">
+				order_no,
+			</if>
+			<if test=" objId != null and objId != ''">
+				obj_id,
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee,
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				delivery_time,
+			</if>
+			<if test=" serviceTime != null and serviceTime != ''">
+				service_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" orderNo != null and orderNo != ''">
+				#{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" objId != null and objId != ''">
+				#{objId,jdbcType=INTEGER},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				#{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				#{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" serviceTime != null and serviceTime != ''">
+				#{serviceTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.OrderDelivery">
+		update order_delivery orderDelivery
+		<set>
+			<if test=" orderNo != null and orderNo != ''">
+				order_no = #{orderNo,jdbcType=VARCHAR},
+			</if>
+			<if test=" objId != null and objId != ''">
+				obj_id = #{objId,jdbcType=INTEGER},
+			</if>
+			<if test=" deliveryFee != null and deliveryFee != ''">
+				delivery_fee = #{deliveryFee,jdbcType=DECIMAL},
+			</if>
+			<if test=" deliveryTime != null and deliveryTime != ''">
+				delivery_time = #{deliveryTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test=" serviceTime != null and serviceTime != ''">
+				service_time = #{serviceTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update order_delivery  orderDelivery set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update order_delivery orderDelivery set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update order_delivery orderDelivery set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.OrderDelivery">
+		update order_delivery orderDelivery set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>

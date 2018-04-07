@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MerchantDao">
+    <resultMap id="merchantMap" type="com.cndinuo.domain.Merchant">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtName" column="mrht_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="loginName" column="login_name" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="password" column="password" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="mrhtType" column="mrht_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="status" column="status" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="deviceType" column="device_type" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="deviceToken" column="device_token" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="salt" column="salt" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="deleted" column="deleted" javaType="java.lang.Byte" jdbcType="TINYINT"/>
+        <result property="remark" column="remark" javaType="java.lang.String" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		mrht_name,
+		login_name,
+		password,
+		mrht_type,
+		status,
+		device_type,
+		device_token,
+		create_time,
+		update_time,
+		salt,
+		deleted,
+		remark
+	</sql>
+
+	<select id="getMrhtForHomeByPage" parameterType="com.cndinuo.page.Page" resultType="java.util.Map">
+		SELECT
+			DISTINCT
+			m.id AS mrhtId,
+			m.mrht_name AS mrhtName,
+			CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),'/',mi.store_image) AS storeImage,
+			mi.office_time AS officeTime,
+            (select `value` from sys_setting where `key` = 'delivery_fee' and deleted = 0) AS deliveryFee,
+			compute_distance(#{p.lng},#{p.lat},mi.lng,mi.lat) AS distance,
+			compute_time(#{p.lng},#{p.lat},mi.lng,mi.lat) AS time,
+			compute_office_time(mi.office_time) AS office
+		FROM merchant m
+		left join mrht_info mi on m.id = mi.mrht_id
+		<if test="p.keyWord != null and p.keyWord != ''">
+			left join mrht_goods mg on m.id = mg.mrht_id
+		</if>
+		WHERE
+			m.deleted = 0
+		AND m.mrht_type = 2
+		AND m.status = 2
+		<if test="p.keyWord != null and p.keyWord != ''">
+			AND (m.mrht_name LIKE CONCAT('%',#{p.keyWord},'%') OR mg.goods_name LIKE CONCAT('%',#{p.keyWord},'%'))
+		</if>
+	</select>
+
+	<select id="getByDistanceAndTime" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			m.mrht_name AS mrhtName,
+			mi.office_time AS officeTime,
+			CONCAT((SELECT `value` FROM sys_setting WHERE `key` = 'img_server' and deleted =0),'/',mi.store_image) AS storeImage,
+			(SELECT `value` FROM sys_setting WHERE `key` = 'delivery_fee' and deleted =0 ) AS deliveryFee,
+			compute_distance (#{lng},#{lat},mi.lng,mi.lat) AS distance,
+			compute_time (#{lng},#{lat},mi.lng,mi.lat) AS time
+		FROM merchant m,mrht_info mi
+			where m.deleted = 0
+			AND m.id = mi.mrht_id
+			AND m.mrht_type = 2
+			AND m. STATUS = 2
+			AND m.id = #{id}
+	</select>
+
+
+	<select id="getByPurId" parameterType="java.lang.Integer" resultMap="merchantMap">
+		SELECT DISTINCT m.id,m.mrht_name FROM merchant m ,mrht_purchase_flow f,mrht_purchase p
+		WHERE
+		f.pur_id = p.id
+		AND m.id = p.mrht_id
+		AND f.pur_id = #{purId}
+	</select>
+
+    <select id="getById" resultMap="merchantMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from merchant  merchant
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="merchantMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from merchant  merchant
+		<where>
+			and deleted = 0
+			<if test="loginName != null and loginName != ''" >
+				and login_name = #{loginName}
+			</if>
+			<if test="mrhtType != null and mrhtType != ''" >
+				and mrht_type = #{mrhtType}
+			</if>
+			<if test="status != null and status != ''" >
+				and status = #{status}
+			</if>
+		</where>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="merchantMap" parameterType="com.cndinuo.domain.Merchant">
+		select <include refid="cols"/> from merchant  merchant
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="merchantMap" parameterType="com.cndinuo.page.Page">
+		select
+			m.id,
+			m.mrht_name,
+			m.login_name,
+			m.password,
+			m.mrht_type,
+			m.status,
+			m.create_time,
+			m.update_time,
+			m.salt,
+			m.deleted,
+			m.remark,
+			mi.office_time as officeTime
+		from merchant  m,mrht_info mi
+		<where>
+			and m.deleted = 0
+			and m.id = mi.mrht_id
+			<if test="p != null and p.mrhtName != null and p.mrhtName != ''" >
+				and m.mrht_name like CONCAT('%',#{p.mrhtName},'%')
+			</if>
+			<if test="p != null and p.status == 1" >
+				and m.status = #{p.status}
+			</if>
+			<if test="p != null and p.status == 2" >
+				and m.status >= #{p.status}
+			</if>
+		</where>
+		order by id desc
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from merchant  merchant
+	</select>
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from merchant  merchant
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from merchant  merchant
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.Merchant" useGeneratedKeys="true" keyProperty="id">
+		insert into merchant (
+			mrht_name,
+			login_name,
+			password,
+			mrht_type,
+			status,
+			create_time,
+			update_time,
+			salt,
+			deleted,
+			remark)
+		value (
+			#{mrhtName,jdbcType=VARCHAR},
+			#{loginName,jdbcType=VARCHAR},
+			#{password,jdbcType=VARCHAR},
+			#{mrhtType,jdbcType=TINYINT},
+			#{status,jdbcType=TINYINT},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{updateTime,jdbcType=TIMESTAMP},
+			#{salt,jdbcType=VARCHAR},
+			#{deleted,jdbcType=TINYINT},
+			#{remark,jdbcType=VARCHAR}
+		)
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.Merchant">
+		update merchant merchant
+		<set>
+			<if test="mrhtName != null and mrhtName != ''">
+				mrht_name = #{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test="loginName != null and loginName != ''">
+				login_name = #{loginName,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="mrhtType != null and mrhtType != ''">
+				mrht_type = #{mrhtType,jdbcType=TINYINT},
+			</if>
+			<if test="status != null and status != ''">
+				mrht_name = #{mrhtName,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime != null and createTime != ''">
+				create_time = #{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null and updateTime != ''">
+				update_time = #{updateTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="salt != null and salt != ''">
+				salt = #{salt,jdbcType=VARCHAR},
+			</if>
+			<if test="deleted != null and deleted != ''">
+				deleted = #{deleted,jdbcType=TINYINT},
+			</if>
+			<if test="remark != null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+		</set>
+		 where id= #{id}
+	</update>
+    <update id="updateByMap" parameterType="java.util.Map">
+		update merchant  merchant set 
+		<if test="deviceType != null" >
+			device_type = #{deviceType}
+		</if>
+		<if test="deviceToken != null and deviceToken != ''" >
+			,device_token = #{deviceToken}
+		</if>
+		<where>
+			<if test="mrhtId != null">
+				id = #{mrhtId}
+			</if>
+		</where>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update merchant merchant set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update merchant merchant set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.Merchant">
+		update merchant merchant set deleted=1 
+		where id=#{id}
+	</update>
+
+	<update id="updateByStatus" parameterType="com.cndinuo.domain.Merchant">
+		update merchant merchant
+		<set>
+			<if test="status != null">
+				status = #{status,jdbcType=TINYINT},
+			</if>
+				update_time = now(),
+			<if test="remark != null and remark != ''">
+				remark = #{remark,jdbcType=VARCHAR}
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+</mapper>

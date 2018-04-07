@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MberFavoriteDao">
+    <resultMap id="mberFavoriteMap" type="com.cndinuo.domain.MberFavorite">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mberId" column="mber_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="favTime" column="fav_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="cols">
+		id,
+		mber_id,
+		mrht_id,
+		fav_time
+	</sql>
+
+    <select id="getById" resultMap="mberFavoriteMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mber_favorite  mberFavorite
+		 where id = #{id}
+	</select>
+
+    <select id="getByMap" resultMap="mberFavoriteMap" parameterType="java.util.Map">
+		select <include refid="cols"/> from mber_favorite  mberFavorite
+		<where>
+			<if test="mberId != null and mberId != ''" >
+				and mber_id = #{mberId}
+			</if>
+			<if test="mrhtId != null and mrhtId != ''">
+				and mrht_id = #{mrhtId}
+			</if>
+		</where>
+		order by fav_time desc
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByEntity" resultMap="mberFavoriteMap" parameterType="com.cndinuo.domain.MberFavorite">
+		select <include refid="cols"/> from mber_favorite  mberFavorite
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getByPage" resultMap="mberFavoriteMap" parameterType="com.cndinuo.page.Page">
+		SELECT
+			mf.id AS id,
+			mf.mber_id AS mberId,
+			mf.fav_time AS favTime,
+			m.id AS mrhtId,
+			m.mrht_name AS mrhtName,
+			CONCAT((select `value` from sys_setting where `key` = 'img_server' and deleted = 0),'/',mi.store_image) AS storeImage,
+			mi.office_time AS officeTime,
+			(select `value` from sys_setting where `key` = 'delivery_fee' and deleted = 0) AS deliveryFee,
+			compute_distance(#{p.lng},#{p.lat},mi.lng,mi.lat) AS distance,
+			compute_time(#{p.lng},#{p.lat},mi.lng,mi.lat) AS time,
+			compute_office_time(mi.office_time) AS office
+		FROM mber_favorite mf,merchant m,mrht_info mi
+		WHERE
+			mf.mrht_id = m.id
+			AND m.id = mi.mrht_id
+			AND mf.mber_id = #{p.mberId}
+	</select>
+
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mber_favorite  mberFavorite
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mber_favorite  mberFavorite
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mber_favorite  mberFavorite
+		<!--添加if语句添加过滤条件-->
+	</select>
+
+    <insert id="insert" parameterType="com.cndinuo.domain.MberFavorite" useGeneratedKeys="true" keyProperty="id">
+		insert into mber_favorite
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" mberId != null and mberId != ''">
+				mber_id,
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" favTime != null and favTime != ''">
+				fav_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" mberId != null and mberId != ''">
+				#{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" favTime != null and favTime != ''">
+				#{favTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+
+    <update id="updateById" parameterType="com.cndinuo.domain.MberFavorite">
+		update mber_favorite mberFavorite
+		<set>
+			<if test=" mberId != null and mberId != ''">
+				mber_id = #{mberId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" favTime != null and favTime != ''">
+				fav_time = #{favTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+
+    <update id="updateByMap">
+		update mber_favorite  mberFavorite set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+		delete from mber_favorite
+		where id=#{id}
+	</delete>
+
+    <delete id="deleteByMap" parameterType="java.util.Map">
+		delete  from mber_favorite
+		<where>
+			<if test="ids != null and ids != ''" >
+				and id in (${ids})
+			</if>
+		</where>
+		<!-- 添加条件属性 -->
+	</delete>
+
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MberFavorite">
+		update mber_favorite mberFavorite set deleted=1 
+		where id=#{id}
+	</update>
+
+</mapper>

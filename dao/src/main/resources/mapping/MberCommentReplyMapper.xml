@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "/WEB-INF/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cndinuo.dao.MberCommentReplyDao">
+    <resultMap id="mberCommentReplyMap" type="com.cndinuo.domain.MberCommentReply">
+        <result property="id" column="id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="comId" column="com_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="mrhtId" column="mrht_id" javaType="java.lang.Integer" jdbcType="INTEGER"/>
+        <result property="content" column="content" javaType="java.lang.String" jdbcType="VARCHAR"/>
+        <result property="replyTime" column="reply_time" javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="cols">
+		id,
+		com_id,
+		mrht_id,
+		content,
+		reply_time
+	</sql>
+    <select id="getById" resultMap="mberCommentReplyMap" parameterType="java.lang.Integer">
+		select <include refid="cols"/> from mber_comment_reply  mberCommentReply
+		 where id = #{id}
+	</select>
+    <select id="getByMap" resultMap="mberCommentReplyMap" parameterType="java.util.Map">
+		select
+			mcr.id,
+			mcr.com_id,
+			mcr.mrht_id,
+			mi.nick_name as nickName,
+			mcr.content,
+			mcr.reply_time
+		from mber_comment_reply  mcr,mber_comment mc,mber_info mi
+		<where>
+			mcr.com_id = mc.id
+			and mcr.mrht_id = #{mrhtId}
+			and mcr.com_id = #{comId}
+			and mc.mber_id = mi.mber_id
+		</where>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByEntity" resultMap="mberCommentReplyMap" parameterType="com.cndinuo.domain.MberCommentReply">
+		select <include refid="cols"/> from mber_comment_reply  mberCommentReply
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getByPage" resultMap="mberCommentReplyMap" parameterType="com.cndinuo.page.Page">
+		select <include refid="cols"/> from mber_comment_reply  mberCommentReply
+		<if test="p != null and p.whereSql != null and p.whereSql != ''" >
+			<![CDATA[${p.whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCount" resultType="java.lang.Integer">
+		select count(1) from mber_comment_reply  mberCommentReply
+	</select>
+
+    <select id="getCountByMap" resultType="java.lang.Integer">
+		select count(1) from mber_comment_reply  mberCommentReply
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</select>
+    <select id="getCountByEntity" resultType="java.lang.Integer">
+		select count(1) from mber_comment_reply  mberCommentReply
+		<!--添加if语句添加过滤条件-->
+	</select>
+    <insert id="insert" parameterType="com.cndinuo.domain.MberCommentReply" useGeneratedKeys="true" keyProperty="id">
+		insert into mber_comment_reply
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test=" comId != null and comId != ''">
+				com_id,
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id,
+			</if>
+			<if test=" content != null and content != ''">
+				content,
+			</if>
+			<if test=" replyTime != null and replyTime != ''">
+				reply_time
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test=" comId != null and comId != ''">
+				#{comId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				#{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" content != null and content != ''">
+				#{content,jdbcType=VARCHAR},
+			</if>
+			<if test=" replyTime != null and replyTime != ''">
+				#{replyTime,jdbcType=TIMESTAMP}
+			</if>
+		</trim>
+	</insert>
+    <update id="updateById" parameterType="com.cndinuo.domain.MberCommentReply">
+		update mber_comment_reply mberCommentReply
+		<set>
+			<if test=" comId != null and comId != ''">
+				com_id = #{comId,jdbcType=INTEGER},
+			</if>
+			<if test=" mrhtId != null and mrhtId != ''">
+				mrht_id = #{mrhtId,jdbcType=INTEGER},
+			</if>
+			<if test=" content != null and content != ''">
+				content = #{content,jdbcType=VARCHAR},
+			</if>
+			<if test=" replyTime != null and replyTime != ''">
+				reply_time = #{replyTime,jdbcType=TIMESTAMP}
+			</if>
+		</set>
+		 where id= #{id} 
+	</update>
+    <update id="updateByMap">
+		update mber_comment_reply  mberCommentReply set 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加查询条件属性 -->
+	</update>
+    <update id="deleteById" parameterType="java.lang.Integer">
+		update mber_comment_reply mberCommentReply set deleted=1
+		where id=#{id}
+	</update>
+    <update id="deleteByMap" parameterType="java.util.Map">
+		update mber_comment_reply mberCommentReply set deleted=1 
+		<if test="whereSql != null and whereSql != ''" >
+			<![CDATA[${whereSql}]]>
+		</if>
+		<!-- 添加条件属性 -->
+	</update>
+    <update id="deleteByEntity" parameterType="com.cndinuo.domain.MberCommentReply">
+		update mber_comment_reply mberCommentReply set deleted=1 
+		where id=#{id}
+	</update>
+</mapper>
